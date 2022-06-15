@@ -1,0 +1,4 @@
+POST https://app.iedeoccidente.com/generaPuestos2.php
+content-type: application/json
+
+{"asignacion":"1","year":2022,"periodo":"DOS"}

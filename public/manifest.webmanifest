@@ -1,0 +1,38 @@
+{
+    "theme_color": "#4ff635",
+    "background_color": "#5d5650",
+    "display": "fullscreen",
+    "scope": "./",
+    "start_url": "index.html",
+    "name": "Instituci\u00f3n Educativa de Occidente Notas Estudiantes",
+    "short_name": "Notas Estudiantes",
+    "description": "Visualizaci\u00f3n de informaci\u00f3n acad\u00e9mica",
+    "icons": [
+        {
+            "src": "icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icon-256x256.png",
+            "sizes": "256x256",
+            "type": "image/png"
+        },
+        {
+            "src": "icon-384x384.png",
+            "sizes": "384x384",
+            "type": "image/png"
+        },
+        {
+            "src": "icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+          }
+    ]
+}

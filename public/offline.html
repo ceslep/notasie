@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modo Offline.</title>
+    <style>
+        *{font-family: Verdana, Geneva, Tahoma, sans-serif;}
+        #tablePeriodos table { border-collapse: collapse; text-align: left; width: 100%; }  #tablePeriodos {font: normal 12px/150% Arial, Helvetica, sans-serif; background: #fff; overflow: hidden; border: 1px solid #006699; -webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px; } #tablePeriodos table td,  #tablePeriodos table th { padding: 3px 10px; } #tablePeriodos table thead th {background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #006699), color-stop(1, #00557F) );background:-moz-linear-gradient( center top, #006699 5%, #00557F 100% );filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#006699', endColorstr='#00557F');background-color:#006699; color:#ffffff; font-size: 15px; font-weight: bold; border-left: 1px solid #0070A8; }  #tablePeriodos table thead th:first-child { border: none; } #tablePeriodos table tbody td { color: #00496B; border-left: 1px solid #E1EEF4;font-size: 12px;font-weight: normal; } #tablePeriodos table tbody .alt td { background: #E1EEF4; color: #00496B; } #tablePeriodos table tbody td:first-child { border-left: none; } #tablePeriodos table tbody tr:last-child td { border-bottom: none; } #tablePeriodos table tfoot td div { border-top: 1px solid #006699;background: #E1EEF4;}  #tablePeriodos table tfoot td { padding: 0; font-size: 12px }  #tablePeriodos table tfoot td div{ padding: 2px; } #tablePeriodos table tfoot td ul { margin: 0; padding:0; list-style: none; text-align: right; } #tablePeriodos table tfoot  li { display: inline; } #tablePeriodos table tfoot li a { text-decoration: none; display: inline-block;  padding: 2px 8px; margin: 1px;color: #FFFFFF;border: 1px solid #006699;-webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px; background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #006699), color-stop(1, #00557F) );background:-moz-linear-gradient( center top, #006699 5%, #00557F 100% );filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#006699', endColorstr='#00557F');background-color:#006699; } #tablePeriodos table tfoot ul.active,  #tablePeriodos table tfoot ul a:hover { text-decoration: none;border-color: #006699; color: #FFFFFF; background: none; background-color:#00557F;}
+    </style>
+</head>
+
+<body>
+    <p>Modo Offline <h4 id="nombres"></h4></p>
+    Período
+    <select id="periodos">
+
+    </select>
+    <div id="tablePeriodos">
+
+    </div>
+
+</body>
+<script>
+
+    function generateTable(data) {
+        let table = document.createElement('table');
+        let thead = document.createElement('thead');
+        let tbody = document.createElement('tbody');
+        let tr = document.createElement('tr');
+        let th = document.createElement('th');
+        th.innerHTML = 'Asignatura';
+        tr.appendChild(th);
+        th = document.createElement('th');
+        th.innerHTML = 'Valoración';
+        tr.appendChild(th);
+        th = document.createElement('th');
+        th.innerHTML = 'Desempeño';
+        tr.appendChild(th);
+        thead.appendChild(tr);
+        table.appendChild(thead);
+        table.appendChild(tbody);
+       // document.body.appendChild(table);
+        for (let i = 0; i < data.length; i++) {
+            let tr = document.createElement('tr');
+            let td = document.createElement('td');
+            td.innerHTML = data[i].asignatura;
+            tr.appendChild(td);
+            td = document.createElement('td');
+            let val=parseFloat(data[i].valoracion).toFixed(2);
+            td.innerHTML = data[i].valoracion?parseFloat(data[i].valoracion).toFixed(2):"";
+            if(val<3) td.style.color="red";
+            td.style.textAlign="center";
+            tr.appendChild(td);
+            td = document.createElement('td');
+            td.innerHTML = data[i].desempeno;
+            td.style.textAlign="center";
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+        }
+        console.log(table);
+        document.getElementById("tablePeriodos").removeChild(document.getElementById("tablePeriodos").firstChild);
+        document.getElementById("tablePeriodos").appendChild(table);
+    }
+
+
+    document.getElementById("periodos").addEventListener("change",e=>{
+        let index=dataPeriodos.findIndex(x=>x.periodo==e.target.value);
+        let data=dataPeriodos[index].datos;
+        generateTable(data);
+    });
+    let dataPeriodos = JSON.parse(localStorage.getItem('data'));
+    console.log(dataPeriodos);
+    let html="<option></option>";
+    dataPeriodos.sort(d=>{
+        if(d.periodo==="UNO") return -1;
+        if(d.periodo==="DOS") return 1;
+        if(d.periodo==="TRES") return 0;
+        if(d.periodo==="CUATRO") return 1;
+        if(d.periodo==="FINAL") return 2;
+    }).forEach(element => {
+        html+=`<option value=${element.periodo}>${element.periodo}</option>`;
+    });
+    document.getElementById("nombres").innerHTML=dataPeriodos[0].nombres;
+    document.getElementById('periodos').innerHTML=html;
+        //generate a table for a dataPeriodos with keys asignatura,valoracion,desempeno
+
+
+
+
+
+
+
+</script>
+
+</html>
