@@ -547,7 +547,7 @@
                             <Calendar4Week />
                             {#if nota.cantidadInasistencias != 0}
                                 <Badge color="success"
-                                    >{nota.cantidadInasistencias}</Badge
+                                    >{nota.cantidadInasistencias??0}</Badge
                                 >
                             {/if}
                         </Button>

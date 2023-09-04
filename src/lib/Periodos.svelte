@@ -57,6 +57,8 @@
             }
         );
         let data = await convivencia.json();
+        console.log(data);
+        return
         datosConvivencia = data;
         positivo =
             datosConvivencia.findIndex((dc) => dc.tipoFalta === "POSITIVO") >=

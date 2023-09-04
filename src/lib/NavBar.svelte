@@ -45,24 +45,27 @@
   }
 
   async function aceptarModal(event) {
-    console.log(event.detail);
+    console.log(event.detail.dataRegistroT);
     let action = event.detail.text;
     console.log(action);
     login = false;
     if (action === "Aceptar" && event.detail.result) {
-      await saveLog(event.detail.data.estudiante);
+      const datos=event.detail.dataRegistroT;
+      const [data]=Object.entries(datos).map(d=>d[1]).filter(d=>parseInt(d.year)===(new Date()).getFullYear());
+      console.log(data);
+      await saveLog(data);
       Swal.fire({
         title: "Aceptar",
-        text: `Bienvenido ${event.detail.data.estudiante.nombres}`,
+        text: `Bienvenido ${data.nombres}`,
         icon: "success",
       });
-      nombres = event.detail.data.estudiante.nombres;
-      nivel = event.detail.data.estudiante.nivel;
-      numero = event.detail.data.estudiante.numero;
+      nombres = data.nombres;
+      nivel = data.nivel;
+      numero = data.numero;
       periodos = true;
-      dataEstudiante = event.detail.data;
-      estudiante = dataEstudiante.estudiante.estudiante;
-      periodo = dataEstudiante.periodo.nombre;
+      dataEstudiante = {...data};
+      estudiante = data.estudiante;
+      periodo = data.periodo;
       dataRegistro = event.detail.dataRegistro[0];
       block = "periodos";
     } else if (action === "Aceptar" && !event.detail.result) {
@@ -76,7 +79,6 @@
       block = "register";
     }
   }
-
   const openRegister = () => {
     toggle();
     block = "register";
@@ -126,6 +128,7 @@
   }
 
   const saveLog = async (data) => {
+    console.log(data)
     let position = await getCoords();
     console.log(position);
     let response = await fetch(
@@ -133,7 +136,7 @@
       {
         method: "POST",
         body: JSON.stringify({
-          estudiante:data.estudiante,
+          estudiante:data.estudiante??data.identificacion,
           nombres: data.nombres,
           nivel:data.nivel,
           numero:data.numero,
@@ -148,9 +151,6 @@
       }
     );
   };
-  onMount(() => {
-   
-  });
 </script>
 
 {#if login}

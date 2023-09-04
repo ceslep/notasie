@@ -18,15 +18,17 @@
     "@popperjs/core": "^2.11.5",
     "@sweetalert2/themes": "^5.0.10",
     "animate.css": "^4.1.1",
+    "audit": "^0.0.6",
     "bootstrap": "^5.2.0-beta1",
     "bootstrap-icons": "^1.8.1",
     "chart.js": "^3.7.1",
     "firebase": "^9.6.11",
+    "fix": "^0.0.3",
     "leaflet": "^1.8.0",
     "moment": "^2.29.3",
     "svelte-chartjs": "^1.1.4",
     "sveltestrap": "^5.9.0",
-    "sweetalert2": "^11.4.9",
+    "sweetalert2": "^11.4.8",
     "vanilla-marquee": "^1.1.1"
   }
 }
