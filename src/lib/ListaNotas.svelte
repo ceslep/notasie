@@ -542,7 +542,7 @@
                             on:click={() => {
                                 openmodalInasistencias(nota.asignatura);
                             }}
-                            title="Mostrar inasistencias del perído para {nota.asignatura}"
+                            title="Mostrar inasistencias del período para {nota.asignatura}"
                         >
                             <Calendar4Week />
                             {#if nota.cantidadInasistencias != 0}

@@ -55,9 +55,9 @@
 
     onMount(async () => {
        
-        inasistencias = await getInasistenciasDetallado();
-        inasistenciasDetallado = inasistencias.inasistencias;
-        total = inasistencias.total;
+        inasistenciasDetallado = await getInasistenciasDetallado();
+        //inasistenciasDetallado = inasistencias.inasistencias;
+        total = inasistenciasDetallado.length;
         setTimeout(() => {
             if (inasistenciasDetallado.length === 0) {
                 sendClose('no hay inasistencias');
