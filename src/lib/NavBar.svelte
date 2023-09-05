@@ -19,6 +19,7 @@
   let isOpen = false;
   let login = false;
   let dataRegistro = {};
+  let dtr;
 
   //Pestañas
   let periodos = false;
@@ -30,6 +31,7 @@
   let estudiante;
   let nombres;
   let periodo;
+  let asignacion;
   let news;
   let block = "";
 
@@ -66,7 +68,13 @@
       dataEstudiante = {...data};
       estudiante = data.estudiante;
       periodo = data.periodo;
-      dataRegistro = event.detail.dataRegistro[0];
+      console.log(event.detail);
+      const {dataRegistroT:dt}=event.detail;
+      console.log(dt);
+      const [dtr1]=Object.keys(dt).map(k=>dt[k]).filter(d=>d.year===(new Date()).getFullYear())
+      console.log(dtr1);
+      dtr={...dtr1};
+      asignacion=dtr.asignacion;
       block = "periodos";
     } else if (action === "Aceptar" && !event.detail.result) {
       Swal.fire({
@@ -175,7 +183,7 @@
 </Navbar>
 
 {#if block === "periodos"}
-  <Periodos dataEstudiante={dataEstudiante.estudiante} {dataRegistro} {nombres} {estudiante} {periodo} {nivel} {numero} />
+  <Periodos {asignacion} nombres={dtr.nombres} dataEstudiante={dataEstudiante.estudiante} {dataRegistro} {estudiante} {periodo} {nivel} {numero} />
 {/if}
 
 {#if block === "register"}

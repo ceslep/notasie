@@ -1,5 +1,5 @@
 <script>
-    import { createEventDispatcher } from "svelte";
+    import { afterUpdate, createEventDispatcher } from "svelte";
     import { TabContent, TabPane } from "sveltestrap";
 
     import {
@@ -23,17 +23,23 @@
     };
     export let estudiante;
     export let periodo;
+    export let nombres;
     export let puestosIe = [];
     export let puestosGrupo = [];
     export let puestosPeriodos = [];
 
+    afterUpdate(()=>{
+       
+        console.log(puestosIe);
+    })
     let pgrupo;
     let pie;
     $: if (puestosGrupo.length > 0) {
-        pgrupo = puestosGrupo.findIndex((p) => p.nombres === estudiante) + 1;
+        pgrupo = puestosGrupo.findIndex((p) => p.nombres == nombres) + 1;
     }
     $: if (puestosIe.length > 0) {
-        pie = puestosIe.findIndex((p) => p.nombres === estudiante) + 1;
+        console.log(estudiante)
+        pie = puestosIe.findIndex((p) => p.nombres == nombres) + 1;
     }
 
     let dataC = [];
@@ -42,6 +48,7 @@
     let dataLabels2 = [];
 
     async function tabChange(e) {
+        console.log(e)
         if (e.detail === "grp") {
             let datac = [];
             let datac2 = [];
@@ -107,7 +114,7 @@
     </ModalHeader>
     <ModalBody>
         <main>
-            <TabContent on:tab={tabChange}>
+            <!-- <TabContent on:tab={tabChange}>
                 <TabPane tabId="alpha" tab="Ie" active>
                     <h2>Puestos I.E. Período {periodo}</h2>
                     <p class="font-weight-bold text-success">
@@ -132,7 +139,24 @@
                         Label={"Puesto"}
                     />
                 </TabPane>
-            </TabContent>
+            </TabContent> -->
+            <TabContent>
+                <TabPane tabId="alpha" tab="Ie" active>
+                    <h2>Puestos I.E. Período {periodo}</h2>
+                    <p class="font-weight-bold text-success">
+                        Puesto en la institución = {pie}
+                    </p>
+                    <TablePuestos estudiante={nombres} data={puestosIe} />
+                </TabPane>
+                <TabPane tabId="bravo" tab="Grupo">
+                    <h2>Puestos Grupo Período {periodo}</h2>
+                    <p class="font-weight-bold text-success">
+                        Puesto en el Grupo = {pgrupo}
+                    </p>
+                    <TablePuestos estudiante={nombres} data={puestosGrupo} />
+                </TabPane>
+               
+              </TabContent>
         </main>
     </ModalBody>
     <ModalFooter>

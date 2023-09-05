@@ -28,7 +28,7 @@
     <table class="table  table-bordered caption-top">
         <caption
             ><h4 class="text-success">
-                Profesor:{notasDetallado[0].Docente}
+                Profesor:{notasDetallado[0].profesor}
             </h4></caption
         >
         <thead>

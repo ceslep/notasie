@@ -57,7 +57,7 @@
        
         inasistenciasDetallado = await getInasistenciasDetallado();
         //inasistenciasDetallado = inasistencias.inasistencias;
-        total = inasistenciasDetallado.length;
+        total = inasistenciasDetallado.filter(i=>!isNaN(parseInt(i.horas))).reduce((a,b)=>a+parseInt(b.horas),0);
         setTimeout(() => {
             if (inasistenciasDetallado.length === 0) {
                 sendClose('no hay inasistencias');

@@ -10,6 +10,7 @@
         Table,
     } from "sveltestrap";
     import Spn from "./Spn.svelte";
+  import { afterUpdate } from "svelte";
     export let estudiante;
     export let data;
 
@@ -17,6 +18,10 @@
         return estu===estudiante;
     }
 
+    afterUpdate(()=>{
+      //  console.clear();
+        console.log(data);
+    })
 </script>
 
 <main>

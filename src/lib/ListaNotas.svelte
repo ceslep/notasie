@@ -28,6 +28,8 @@
     export let notas = [];
     export let dataEstudiante;
     export let estudiante;
+    export let asignacion;
+    export let nombres;
     let asignatura;
     export let periodo;
     let valoracion;
@@ -138,6 +140,7 @@
                 body: JSON.stringify({
                     estudiante,
                     periodo,
+                    asignacion
                 }),
             }
         );
@@ -153,6 +156,7 @@
                 body: JSON.stringify({
                     estudiante,
                     periodo,
+                    asignacion
                 }),
             }
         );
@@ -227,7 +231,7 @@
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    asignacion: dataEstudiante.asignacion,
+                    asignacion,
                     year: new Date().getFullYear().toString(),
                     periodo: per,
                 }),
@@ -251,9 +255,10 @@
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    ...dataEstudiante,
+                    estudiante,
                     year: new Date().getFullYear().toString(),
                     periodo: per,
+                    asignacion
                 }),
             }
         );
@@ -391,6 +396,7 @@
         {puestosPeriodos}
         {puestosIe}
         {puestosGrupo}
+        {nombres}
         on:close={closeModalPuesto}
     />
 {/if}
@@ -547,7 +553,7 @@
                             <Calendar4Week />
                             {#if nota.cantidadInasistencias != 0}
                                 <Badge color="success"
-                                    >{nota.cantidadInasistencias??0}</Badge
+                                    >{nota.cantidadInasistencias??""}</Badge
                                 >
                             {/if}
                         </Button>

@@ -60,8 +60,8 @@
       text: "Aceptar",
       result: result.acceso !== "denegado",
       data: result,
-      dataRegistro: { ...dataRegistro },
-      dataRegistroT: { ...dataRegistroT },
+      dataRegistro: { ...dataRegistro.filter(data=>data.year=(new Date()).getFullYear()) },
+      dataRegistroT: { ...dataRegistroT.filter(data=>data.year=(new Date()).getFullYear())  },
     });
   }
 

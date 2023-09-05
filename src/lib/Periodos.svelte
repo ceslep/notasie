@@ -15,6 +15,7 @@
   export let dataRegistro;
   export let nivel;
   export let numero;
+  export let asignacion;
   let viewMap = false;
   let datosConvivencia = [];
 
@@ -290,7 +291,7 @@
       class="bg-gradient d-flex justify-content-between align-items-center lh-1 text-decoration-none"
       ><a href="#!" class="fs-7 text-decoration-none"
         >{nombres}<br />
-        {estudiante}<br /> <span class="fs-6">{email}</span></a
+        {estudiante}<br /> <span class="fs-6">{email??""}</span></a
       >
 
       {#if photoURL !== ""}
@@ -326,6 +327,8 @@
             {estudiante}
             {periodo}
             notas={dataPeriodo}
+            {asignacion}
+            {nombres}
           />
         {:else}
           <div
@@ -342,6 +345,8 @@
             {estudiante}
             {periodo}
             notas={dataPeriodo}
+            {asignacion}
+            {nombres}
           />
         {:else}
           <div
@@ -358,6 +363,8 @@
             {estudiante}
             {periodo}
             notas={dataPeriodo}
+            {asignacion}
+            {nombres}
           />
         {:else}
           <div
@@ -374,6 +381,8 @@
             {estudiante}
             {periodo}
             notas={dataPeriodo}
+            {asignacion}
+            {nombres}
           />
         {:else}
           <div
@@ -390,6 +399,8 @@
             {estudiante}
             {periodo}
             notas={dataPeriodo}
+            {asignacion}
+            {nombres}
           />
         {:else}
           <div
