@@ -141,7 +141,7 @@
                 </TabPane>
             </TabContent> -->
             <TabContent>
-                <TabPane tabId="alpha" tab="Ie" active>
+                <TabPane tabId="alpha" tab="Institución Educativa" active>
                     <h2>Puestos I.E. Período {periodo}</h2>
                     <p class="font-weight-bold text-success">
                         Puesto en la institución = {pie}

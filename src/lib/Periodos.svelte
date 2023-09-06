@@ -8,6 +8,7 @@
   import ModalViewFoto from "./ModalViewFoto.svelte";
   import Spn from "./Spn.svelte";
   import ListaNotasConcentrador from "./ListaNotasConcentrador.svelte";
+  import ListaConvivencia from "./ListaConvivencia.svelte";
   export let dataEstudiante;
   export let estudiante;
   export let periodo;
@@ -430,6 +431,9 @@
             <Spn />
           </div>
         {/if}
+      </TabPane>
+      <TabPane tabId="Convivencia" tab="Convivencia">
+        <ListaConvivencia {estudiante}/>
       </TabPane>
     </TabContent>
   {/if}

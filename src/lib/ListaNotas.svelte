@@ -19,7 +19,6 @@
     import CardCheckList from "svelte-bootstrap-icons/lib/CardCheckList";
     import Calculator from "svelte-bootstrap-icons/lib/Calculator";
     import Boxes from "svelte-bootstrap-icons/lib/Boxes";
-    import FileEarmarkMedical from "svelte-bootstrap-icons/lib/FileEarmarkMedical/FileEarmarkMedical.svelte";
     import Swal from "sweetalert2";
     import ModalExcusas from "./ModalExcusas.svelte";
     import ModalChart from "./ModalChart.svelte";
@@ -482,7 +481,7 @@
                 }}
                 title="Muestra las Excusas del periodo {periodo}"
                 >Excusas
-                <FileEarmarkMedical />
+                
             </Button>
         </div>
     </div>
