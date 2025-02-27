@@ -1,4 +1,6 @@
 <script>
+// @ts-nocheck
+
   import { onMount } from "svelte";
   import ModalConvivencia from "./ModalConvivencia.svelte";
   import { TabContent, TabPane, Spinner, Alert, Image } from "sveltestrap";

@@ -18,6 +18,7 @@
     export let open=true;
 
     let notasDetallado = [];
+    let notasDetalladoFull=[];
 
     const dispatch = createEventDispatcher();
 
@@ -51,6 +52,7 @@
     onMount(async () => {
        
         notasDetallado = await getNotasDetallado(asignatura,periodo);
+        notasDetalladoFull=[...notasDetallado];
         notasDetallado=notasDetallado.filter(nota=>nota.Nota!==null);
         setTimeout(() => {
             if (notasDetallado.length === 0) {
@@ -69,7 +71,7 @@
     <ModalBody>
         <main>
             {#if notasDetallado.length > 0}
-                <TableNotas {notasDetallado} />
+                <TableNotas {notasDetallado} {notasDetalladoFull}/>
             {:else}
                 <div class="d-flex justify-content-center align-items-center" style="min-height:50vh;">
                     <Spinner size="xxl" />

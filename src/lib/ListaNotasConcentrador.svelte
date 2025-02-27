@@ -36,6 +36,8 @@
       node.classList.add("fw-bold");
     }
   };
+
+$:console.log(notas)
 </script>
 
 <main>
