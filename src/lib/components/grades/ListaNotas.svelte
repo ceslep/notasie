@@ -32,16 +32,16 @@
   }
   const fmt = (v: string) => parseFloat(v || '0').toFixed(1)
 
-  // Obtener la menor nota de las notas individuales y el aspecto asociado
-  function getMinorInfo(nota: any): { menor: string; aspecto: string } {
+  // Obtener la menor nota real de las notas individuales y el aspecto asociado
+  function getMinorInfo(nota: any): { menor: string; aspecto: string; hasData: boolean } {
     if (!nota.countNotas || nota.countNotas.length === 0)
-      return { menor: '0', aspecto: '' }
+      return { menor: '', aspecto: '', hasData: false }
 
     let menor = Infinity
     let aspecto = ''
     for (const cv of nota.countNotas) {
       const str = cv?.toString()?.trim()
-      if (!str || str === 'null' || str === 'undefined' || str === '-') continue
+      if (!str || str === 'null' || str === 'undefined' || str === '-' || str === '0') continue
       // Formato típico: "4.0 - SABER" o "SABER: 4.0" o "3.5"
       let val = NaN
       let desc = ''
@@ -57,12 +57,12 @@
         val = parseFloat(str)
         desc = ''
       }
-      if (!isNaN(val) && val < menor) {
+      if (!isNaN(val) && val > 0 && val < menor) {
         menor = val
         aspecto = desc
       }
     }
-    return { menor: menor === Infinity ? '0' : menor.toFixed(1), aspecto }
+    return { menor: menor === Infinity ? '' : menor.toFixed(1), aspecto, hasData: menor !== Infinity }
   }
 </script>
 
@@ -85,8 +85,7 @@
 <div class="space-y-3">
   {#each notas as nota, i}
     {@const menorInfo = getMinorInfo(nota)}
-    {@const menorVal = parseFloat(menorInfo.menor)}
-    {@const showWarning = menorVal > 0 && menorVal < 3}
+    {@const showWarning = menorInfo.hasData && parseFloat(menorInfo.menor) < 3}
     <div class="glass rounded-2xl overflow-hidden border border-white/5 animate-slide-up" style="animation-delay: {i * 50}ms">
       <div class="p-4">
         <div class="flex items-start justify-between gap-3 mb-3">
@@ -116,13 +115,15 @@
                 <span class="text-sm font-bold text-white">{fmt(nota.valoracion)}</span>
               </div>
             {/if}
-            <div class="text-right min-w-0">
-              <span class="text-[9px] text-slate-500">menor</span>
-              <p class="text-xs font-bold {menorVal < 3 ? 'text-red-400' : 'text-slate-300'}">{menorInfo.menor}</p>
-              {#if menorInfo.aspecto}
-                <p class="text-[9px] text-slate-500 truncate max-w-[80px]" title="{menorInfo.aspecto}">{menorInfo.aspecto}</p>
-              {/if}
-            </div>
+            {#if menorInfo.hasData}
+              <div class="text-right min-w-0">
+                <span class="text-[9px] text-slate-500">menor</span>
+                <p class="text-xs font-bold {parseFloat(menorInfo.menor) < 3 ? 'text-red-400' : 'text-slate-300'}">{menorInfo.menor}</p>
+                {#if menorInfo.aspecto}
+                  <p class="text-[9px] text-slate-500 truncate max-w-[80px]" title="{menorInfo.aspecto}">{menorInfo.aspecto}</p>
+                {/if}
+              </div>
+            {/if}
           </div>
         </div>
         <div class="flex gap-1.5">
