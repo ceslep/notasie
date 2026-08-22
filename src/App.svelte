@@ -27,7 +27,7 @@
   let dataEstudiante = $state<any>(null)
   let notas = $state<any[]>([])
   let convivencia = $state<any[]>([])
-  let notasDetalladas = $state<Record<string, any[]>})
+  let notasDetalladas = $state<Record<string, any[]>>({})
 
   let showPeriodTabs = $state('UNO')
   let refreshing = $state(false)
