@@ -71,6 +71,9 @@
 
 <div class="space-y-3">
   {#each notas as nota, i}
+    {@const menorInfo = getMinorInfo(nota)}
+    {@const menorVal = parseFloat(menorInfo.menor)}
+    {@const showWarning = menorVal > 0 && menorVal < 3}
     <div class="glass rounded-2xl overflow-hidden border border-white/5 animate-slide-up" style="animation-delay: {i * 50}ms">
       <div class="p-4">
         <div class="flex items-start justify-between gap-3 mb-3">
@@ -82,9 +85,6 @@
             </div>
           </div>
           <div class="flex items-center gap-2">
-            {@const menorInfo = getMinorInfo(nota)}
-            {@const menorVal = parseFloat(menorInfo.menor)}
-            {@const showWarning = menorVal > 0 && menorVal < 3}
             {#if showWarning}
               <div class="relative group">
                 <div class="absolute -top-1 -right-1 z-10 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center shadow-lg shadow-red-500/40 animate-pulse">
