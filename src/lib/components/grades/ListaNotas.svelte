@@ -37,16 +37,29 @@
     if (!nota.countNotas || nota.countNotas.length === 0)
       return { menor: '0', aspecto: '' }
 
-    // Buscar la nota numérica más baja en countNotas
     let menor = Infinity
     let aspecto = ''
     for (const cv of nota.countNotas) {
-      // Formato típico: "4.0 - SABER" o "4.0"
-      const parts = cv.toString().split(' - ')
-      const val = parseFloat(parts[0])
+      const str = cv?.toString()?.trim()
+      if (!str || str === 'null' || str === 'undefined' || str === '-') continue
+      // Formato típico: "4.0 - SABER" o "SABER: 4.0" o "3.5"
+      let val = NaN
+      let desc = ''
+      if (str.includes(' - ')) {
+        const parts = str.split(' - ')
+        val = parseFloat(parts[0])
+        desc = parts.slice(1).join(' - ')
+      } else if (str.includes(': ')) {
+        const parts = str.split(': ')
+        val = parseFloat(parts[parts.length - 1])
+        desc = parts.slice(0, -1).join(': ')
+      } else {
+        val = parseFloat(str)
+        desc = ''
+      }
       if (!isNaN(val) && val < menor) {
         menor = val
-        aspecto = parts.length > 1 ? parts.slice(1).join(' - ') : ''
+        aspecto = desc
       }
     }
     return { menor: menor === Infinity ? '0' : menor.toFixed(1), aspecto }
@@ -103,9 +116,12 @@
                 <span class="text-sm font-bold text-white">{fmt(nota.valoracion)}</span>
               </div>
             {/if}
-            <div class="text-right">
+            <div class="text-right min-w-0">
               <span class="text-[9px] text-slate-500">menor</span>
               <p class="text-xs font-bold {menorVal < 3 ? 'text-red-400' : 'text-slate-300'}">{menorInfo.menor}</p>
+              {#if menorInfo.aspecto}
+                <p class="text-[9px] text-slate-500 truncate max-w-[80px]" title="{menorInfo.aspecto}">{menorInfo.aspecto}</p>
+              {/if}
             </div>
           </div>
         </div>
