@@ -4,6 +4,7 @@ import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { fileURLToPath } from 'url'
 
 export default defineConfig({
+  base:'/est/',
   plugins: [tailwindcss(), svelte()],
   resolve: {
     alias: {

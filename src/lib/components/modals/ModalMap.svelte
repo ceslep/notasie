@@ -8,26 +8,29 @@
   let L: any
   let map: any
 
-  onMount(async () => {
-    const d = await mapApi.getDataMap()
-    L = await import('leaflet')
+  onMount(() => {
+    const load = async () => {
+      const d = await mapApi.getDataMap()
+      L = await import('leaflet')
 
-    map = L.map(mapEl, { zoomControl: false }).setView([4.24195, -75.965519], 14)
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map)
+      map = L.map(mapEl, { zoomControl: false }).setView([4.24195, -75.965519], 14)
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map)
 
-    L.control.zoom({ position: 'bottomleft' }).addTo(map)
+      L.control.zoom({ position: 'bottomleft' }).addTo(map)
 
-    L.control.locate({ setView: 'once', locateOptions: { enableHighAccuracy: true } }).addTo(map)
+      L.control.locate({ setView: 'once', locateOptions: { enableHighAccuracy: true } }).addTo(map)
 
-    for (const dt of d) {
-      if (dt.lat !== '0' && dt.lon !== '0') {
-        L.marker([parseFloat(dt.lat), parseFloat(dt.lon)])
-          .bindPopup(`<div class='text-xs'>${dt.Nombres} - ${dt.clase} - ${dt.asignatura}</div>`)
-          .addTo(map)
+      for (const dt of d) {
+        if (dt.lat !== '0' && dt.lon !== '0') {
+          L.marker([parseFloat(dt.lat), parseFloat(dt.lon)])
+            .bindPopup(`<div class='text-xs'>${dt.Nombres} - ${dt.clase} - ${dt.asignatura}</div>`)
+            .addTo(map)
+        }
       }
     }
+    load()
 
-    return () => map.remove()
+    return () => { if (map) map.remove() }
   })
 </script>
 

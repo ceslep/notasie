@@ -18,16 +18,15 @@ export interface Nota {
 }
 
 export interface NotaDetallada {
-  Aspecto: string
-  Nota: string
+  estudiante: string
+  Asignatura: string
+  Nota: string | null
   FechaNota: string
+  Aspecto: string
+  FechaAspecto: string
   Porcentaje: string
   Periodo: string
-  Docenteid: string
-  Asignatura: string
-  Estudiante: string
-  Fechat: string
-  FechaAspecto: string
+  profesor: string
 }
 
 export interface Inasistencia {

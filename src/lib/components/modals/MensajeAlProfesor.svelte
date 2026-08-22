@@ -2,7 +2,7 @@
   import { reclamoApi, getIP } from '$lib/services/api'
   import Swal from 'sweetalert2'
 
-  let { onClose }: { onClose?: () => void } = $props()
+  let { docente = '', asignatura = '', onClose }: { docente?: string; asignatura?: string; onClose?: () => void } = $props()
 
   let masclaV = $state(false)
   let asigV = $state(false)
@@ -34,7 +34,10 @@
   <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick={() => onClose?.()}></div>
   <div class="relative glass-strong w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden z-10">
   <div class="bg-gradient-to-r from-violet-500/20 to-purple-500/20 text-white px-5 py-3 rounded-t-3xl flex items-center justify-between">
-    <h3 class="text-base font-bold">Mensaje al Profesor</h3>
+    <div class="flex items-center gap-2">
+      <img src="https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-lp9vjuXTCqeB9yhVXBoBmyqdy8e9jv.png" alt="" class="w-6 h-6 object-contain" />
+      <h3 class="text-base font-bold">Mensaje al Profesor</h3>
+    </div>
     <button class="text-slate-400 hover:text-white text-lg transition-colors" onclick={() => onClose?.()}>x</button>
   </div>
   <div class="p-5 space-y-3">

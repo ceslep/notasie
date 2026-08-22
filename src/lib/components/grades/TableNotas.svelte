@@ -1,7 +1,7 @@
 ﻿<script lang="ts">
   import type { NotaDetallada } from '$lib/types'
-  let { notasDetallado = [], notasDetalladoFull = [] }: {
-    notasDetallado: NotaDetallada[]; notasDetalladoFull: NotaDetallada[]
+  let { notasDetallado = [], notasDetalladoFull = [], docente = '' }: {
+    notasDetallado: NotaDetallada[]; notasDetalladoFull: NotaDetallada[]; docente?: string
   } = $props()
 
   const competencias = [
@@ -83,5 +83,5 @@
       </tr>
     </tfoot>
   </table>
-  <p class="text-[10px] text-slate-500 mt-2 text-center">Profesor: {notasDetallado[0]?.profesor}</p>
+  <p class="text-[10px] text-slate-500 mt-2 text-center">Profesor: <span class="text-white font-semibold">{docente || notasDetallado[0]?.profesor || 'No disponible'}</span></p>
 </div>

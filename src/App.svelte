@@ -305,16 +305,25 @@
     </div>
   {/if}
   {#if appLoading}
-    <div class="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
-      <div class="flex flex-col items-center gap-5">
+    <div class="fixed inset-0 z-[70] flex items-center justify-center" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);">
+      <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute -top-40 -left-40 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute -bottom-40 -right-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-500/5 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
+      </div>
+      <div class="relative flex flex-col items-center gap-6 animate-in fade-in zoom-in duration-700">
         <div class="relative">
-          <div class="w-20 h-20 rounded-full border-4 border-indigo-500/20 border-t-indigo-500 animate-spin"></div>
-          <div class="absolute inset-0 w-20 h-20 rounded-full border-4 border-transparent border-b-purple-500 animate-spin" style="animation-duration: 1.5s; animation-direction: reverse;"></div>
-          <div class="absolute inset-2 w-16 h-16 rounded-full border-4 border-transparent border-t-pink-500 animate-spin" style="animation-duration: 2s;"></div>
+          <img src="https://app.iedeoccidente.com/eduadmin/escudohd.png" alt="Escudo" class="w-24 h-24 object-contain drop-shadow-2xl" style="filter: drop-shadow(0 0 30px rgba(99, 102, 241, 0.4));" />
+          <div class="absolute -inset-4 rounded-full border border-indigo-500/20 animate-ping" style="animation-duration: 3s;"></div>
         </div>
         <div class="text-center">
-          <p class="text-sm text-white font-semibold">Cargando datos académicos</p>
-          <p class="text-xs text-slate-400 mt-1">Un momento por favor...</p>
+          <h1 class="text-2xl font-extrabold tracking-tight" style="background: linear-gradient(135deg, #f8fafc, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">I.E. de Occidente</h1>
+          <p class="text-xs text-slate-500 mt-1 tracking-widest uppercase">Plataforma Academica</p>
+        </div>
+        <div class="flex gap-1.5">
+          <div class="w-2 h-2 rounded-full bg-indigo-500 animate-bounce" style="animation-delay: 0ms;"></div>
+          <div class="w-2 h-2 rounded-full bg-purple-500 animate-bounce" style="animation-delay: 150ms;"></div>
+          <div class="w-2 h-2 rounded-full bg-pink-500 animate-bounce" style="animation-delay: 300ms;"></div>
         </div>
       </div>
     </div>

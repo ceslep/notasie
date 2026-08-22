@@ -21,7 +21,7 @@
     "@tailwindcss/vite": "^4.0.0",
     "@types/three": "^0.185.4",
     "chart.js": "^4.4.0",
-    "firebase": "^11.0.0",
+    "html2canvas": "^1.4.1",
     "leaflet": "^1.9.0",
     "sweetalert2": "^11.14.0",
     "tailwind-animations": "^1.0.2",

@@ -11,7 +11,7 @@
       </tr></thead>
       <tbody>
         {#each data as lista, i}
-          <tr class="border-b border-white/5 {lista.nombres === estudiante ? 'bg-emerald-50' : ''}">
+          <tr class="border-b border-white/5 {lista.nombres === estudiante ? 'bg-emerald-500/15' : 'active:bg-white/5'}">
             <td class="px-2 py-2 text-center text-[10px]">{i + 1}</td>
             {#each Object.keys(lista) as k}<td class="px-2 py-2 text-center text-[10px]">{lista[k as keyof Puesto]}</td>{/each}
           </tr>

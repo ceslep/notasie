@@ -58,7 +58,7 @@
   <ModalInas {estudiante} asignatura={notaSel.asignatura} {periodo} total={parseInt(notaSel.cantidadInasistencias)} onClose={(t) => { close() }} />
 {/if}
 {#if activeModal === 'excusas'}
-  <ModalExcusas {estudiante} {periodo} total={notas.reduce((a, n) => a + (parseInt(n.cantidadInasistencias) || 0), 0)} onClose={(t) => { close() }} />
+  <ModalExcusas {estudiante} {periodo} total={notas.reduce((a, n) => a + (Number(n.cantidadInasistencias) || 0), 0)} onClose={(t) => { close() }} />
 {/if}
 {#if activeModal === 'desc' && notaSel}
   <ModalDescripcion {estudiante} asignatura={notaSel.asignatura} valoracion={notaSel.valoracion} {periodo} docente={notaSel.docente} onClose={(t) => { close() }} />
