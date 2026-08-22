@@ -6,8 +6,8 @@
   import ModalDescripcion from '../modals/ModalDescripcion.svelte'
   import MensajeAlProfesor from '../modals/MensajeAlProfesor.svelte'
 
-  let { notas = [], estudiante = '', periodo = '', nivel = '', asignacion = '', nombres = '' }: {
-    notas: Nota[]; estudiante: string; periodo: string; nivel: string; asignacion?: string; nombres?: string
+  let { notas = [], notasDetalladas = {}, estudiante = '', periodo = '', nivel = '', asignacion = '', nombres = '' }: {
+    notas: Nota[]; notasDetalladas?: Record<string, any[]>; estudiante: string; periodo: string; nivel: string; asignacion?: string; nombres?: string
   } = $props()
 
   let activeModal = $state('')
@@ -32,34 +32,19 @@
   }
   const fmt = (v: string) => parseFloat(v || '0').toFixed(1)
 
-  // Obtener la menor nota real de las notas individuales y el aspecto asociado
+  // Obtener la menor nota real de las notas detalladas del estudiante
   function getMinorInfo(nota: any): { menor: string; aspecto: string; hasData: boolean } {
-    if (!nota.countNotas || nota.countNotas.length === 0)
+    const det = notasDetalladas[nota.asignatura]
+    if (!det || det.length === 0)
       return { menor: '', aspecto: '', hasData: false }
 
     let menor = Infinity
     let aspecto = ''
-    for (const cv of nota.countNotas) {
-      const str = cv?.toString()?.trim()
-      if (!str || str === 'null' || str === 'undefined' || str === '-' || str === '0') continue
-      // Formato típico: "4.0 - SABER" o "SABER: 4.0" o "3.5"
-      let val = NaN
-      let desc = ''
-      if (str.includes(' - ')) {
-        const parts = str.split(' - ')
-        val = parseFloat(parts[0])
-        desc = parts.slice(1).join(' - ')
-      } else if (str.includes(': ')) {
-        const parts = str.split(': ')
-        val = parseFloat(parts[parts.length - 1])
-        desc = parts.slice(0, -1).join(': ')
-      } else {
-        val = parseFloat(str)
-        desc = ''
-      }
+    for (const d of det) {
+      const val = parseFloat(d.Nota)
       if (!isNaN(val) && val > 0 && val < menor) {
         menor = val
-        aspecto = desc
+        aspecto = d.Aspecto || ''
       }
     }
     return { menor: menor === Infinity ? '' : menor.toFixed(1), aspecto, hasData: menor !== Infinity }

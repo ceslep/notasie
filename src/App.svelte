@@ -27,6 +27,7 @@
   let dataEstudiante = $state<any>(null)
   let notas = $state<any[]>([])
   let convivencia = $state<any[]>([])
+  let notasDetalladas = $state<Record<string, any[]>})
 
   let showPeriodTabs = $state('UNO')
   let refreshing = $state(false)
@@ -114,6 +115,19 @@
 
   async function loadNotas(p: string) {
     notas = await gradesApi.getNotas(p, estudiante)
+    // Cargar notas detalladas de cada materia en paralelo
+    const detMap: Record<string, any[]> = {}
+    await Promise.all(
+      notas.map(async (n: any) => {
+        try {
+          const det = await gradesApi.getNotasDetallado(estudiante, n.asignatura, p)
+          detMap[n.asignatura] = det.filter((d: any) => d.Nota !== null)
+        } catch {
+          detMap[n.asignatura] = []
+        }
+      })
+    )
+    notasDetalladas = detMap
   }
 
   async function loadConvivencia() {
@@ -395,14 +409,14 @@
     <Register onClose={handleRegisterClose} />
   {/if}
 
-  {#if block === 'periodos'}
-    <Periodos
+  {#if block === 'periodos'}      <Periodos
       {estudiante}
       {nivel}
       {numero}
       {asignacion}
       {nombres}
       {notas}
+      {notasDetalladas}
       {showPeriodTabs}
       onTabChange={handleTabChange}
       {convivencia}
