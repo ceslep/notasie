@@ -4,6 +4,7 @@
   import ModalInas from '../modals/ModalInas.svelte'
   import ModalExcusas from '../modals/ModalExcusas.svelte'
   import ModalDescripcion from '../modals/ModalDescripcion.svelte'
+  import MensajeAlProfesor from '../modals/MensajeAlProfesor.svelte'
 
   let { notas = [], estudiante = '', periodo = '', nivel = '', asignacion = '', nombres = '' }: {
     notas: Nota[]; estudiante: string; periodo: string; nivel: string; asignacion?: string; nombres?: string
@@ -11,6 +12,8 @@
 
   let activeModal = $state('')
   let notaSel = $state<any>(null)
+  let openMensaje = $state(false)
+  let notaMensaje = $state<any>(null)
 
   const show = (m: string, n: any) => { activeModal = m; notaSel = n }
   const close = () => { activeModal = ''; notaSel = null }
@@ -28,10 +31,30 @@
     return 'text-red-400'
   }
   const fmt = (v: string) => parseFloat(v || '0').toFixed(1)
+
+  // Obtener la menor nota de las notas individuales y el aspecto asociado
+  function getMinorInfo(nota: any): { menor: string; aspecto: string } {
+    if (!nota.countNotas || nota.countNotas.length === 0)
+      return { menor: '0', aspecto: '' }
+
+    // Buscar la nota numérica más baja en countNotas
+    let menor = Infinity
+    let aspecto = ''
+    for (const cv of nota.countNotas) {
+      // Formato típico: "4.0 - SABER" o "4.0"
+      const parts = cv.toString().split(' - ')
+      const val = parseFloat(parts[0])
+      if (!isNaN(val) && val < menor) {
+        menor = val
+        aspecto = parts.length > 1 ? parts.slice(1).join(' - ') : ''
+      }
+    }
+    return { menor: menor === Infinity ? '0' : menor.toFixed(1), aspecto }
+  }
 </script>
 
 {#if activeModal === 'notas' && notaSel}
-  <ModalNotas {estudiante} asignatura={notaSel.asignatura} {periodo} onClose={(t) => { close() }} />
+  <ModalNotas {estudiante} asignatura={notaSel.asignatura} docente={notaSel.docente} {periodo} onClose={(t) => { close() }} />
 {/if}
 {#if activeModal === 'inas' && notaSel}
   <ModalInas {estudiante} asignatura={notaSel.asignatura} {periodo} total={parseInt(notaSel.cantidadInasistencias)} onClose={(t) => { close() }} />
@@ -42,34 +65,66 @@
 {#if activeModal === 'desc' && notaSel}
   <ModalDescripcion {estudiante} asignatura={notaSel.asignatura} valoracion={notaSel.valoracion} {periodo} docente={notaSel.docente} onClose={(t) => { close() }} />
 {/if}
+{#if openMensaje && notaMensaje}
+  <MensajeAlProfesor docente={notaMensaje.docente} asignatura={notaMensaje.asignatura} onClose={() => { openMensaje = false; notaMensaje = null }} />
+{/if}
 
 <div class="space-y-3">
   {#each notas as nota, i}
     <div class="glass rounded-2xl overflow-hidden border border-white/5 animate-slide-up" style="animation-delay: {i * 50}ms">
       <div class="p-4">
         <div class="flex items-start justify-between gap-3 mb-3">
-          <div class="flex-1 min-w-0">
-            <h4 class="text-sm font-bold text-white truncate">{nota.asignatura}</h4>
-            <p class="text-xs text-slate-400 mt-0.5 truncate">{nota.docente}</p>
+          <div class="flex items-center gap-2 flex-1 min-w-0">
+            <img src="https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-QhvfavmoGfPmREwwvl4XtqTIORARDz.png" alt="" class="w-8 h-8 object-contain flex-shrink-0" />
+            <div class="min-w-0">
+              <h4 class="text-sm font-bold text-white truncate">{nota.asignatura}</h4>
+              <p class="text-xs text-slate-400 mt-0.5 truncate">{nota.docente}</p>
+            </div>
           </div>
           <div class="flex items-center gap-2">
-            <div class="w-12 h-12 rounded-xl bg-gradient-to-br {gradeColor(nota.valoracion)} flex items-center justify-center shadow-lg">
-              <span class="text-sm font-bold text-white">{fmt(nota.valoracion)}</span>
+            {@const menorInfo = getMinorInfo(nota)}
+            {@const menorVal = parseFloat(menorInfo.menor)}
+            {@const showWarning = menorVal > 0 && menorVal < 3}
+            {#if showWarning}
+              <div class="relative group">
+                <div class="absolute -top-1 -right-1 z-10 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center shadow-lg shadow-red-500/40 animate-pulse">
+                  <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                </div>
+                <div class="absolute -bottom-8 left-1/2 -translate-x-1/2 z-20 glass-strong rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-red-500/20">
+                  <span class="text-[9px] text-red-300 font-medium">{menorInfo.aspecto || 'Nota'}: {menorInfo.menor}</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br {gradeColor(nota.valoracion)} flex items-center justify-center shadow-lg relative overflow-hidden">
+                  <div class="absolute inset-0 border-2 border-red-500/50 rounded-xl"></div>
+                  <span class="text-sm font-bold text-white">{fmt(nota.valoracion)}</span>
+                </div>
+              </div>
+            {:else}
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br {gradeColor(nota.valoracion)} flex items-center justify-center shadow-lg">
+                <span class="text-sm font-bold text-white">{fmt(nota.valoracion)}</span>
+              </div>
+            {/if}
+            <div class="text-right">
+              <span class="text-[9px] text-slate-500">menor</span>
+              <p class="text-xs font-bold {menorVal < 3 ? 'text-red-400' : 'text-slate-300'}">{menorInfo.menor}</p>
             </div>
           </div>
         </div>
         <div class="flex gap-1.5">
-          <button class="flex-1 py-2 rounded-xl text-[10px] font-semibold glass text-indigo-300 hover:bg-indigo-500/20 active:scale-95 transition-all" onclick={() => show('notas', nota)}>
-            <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <button class="flex-1 py-2 rounded-xl text-[10px] font-semibold glass text-indigo-300 hover:bg-indigo-500/20 active:scale-95 transition-all flex items-center justify-center gap-1" onclick={() => show('notas', nota)}>
+            <img src="https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-QhvfavmoGfPmREwwvl4XtqTIORARDz.png" alt="" class="w-3.5 h-3.5 object-contain" />
             Notas
           </button>
-          <button class="flex-1 py-2 rounded-xl text-[10px] font-semibold glass text-cyan-300 hover:bg-cyan-500/20 active:scale-95 transition-all" onclick={() => show('inas', nota)}>
-            <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <button class="flex-1 py-2 rounded-xl text-[10px] font-semibold glass text-cyan-300 hover:bg-cyan-500/20 active:scale-95 transition-all flex items-center justify-center gap-1" onclick={() => show('inas', nota)}>
+            <img src="https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-CK4odMSKWdmIj0ueBtNq9HOZR6Fbgv.png" alt="" class="w-3.5 h-3.5 object-contain" />
             {nota.cantidadInasistencias || '0'}
           </button>
-          <button class="flex-1 py-2 rounded-xl text-[10px] font-semibold glass text-purple-300 hover:bg-purple-500/20 active:scale-95 transition-all" onclick={() => show('desc', nota)}>
-            <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <button class="flex-1 py-2 rounded-xl text-[10px] font-semibold glass text-purple-300 hover:bg-purple-500/20 active:scale-95 transition-all flex items-center justify-center gap-1" onclick={() => show('desc', nota)}>
+            <img src="https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-rCHVjln5KLUOliL1uQIEtzhjuvyC3F.png" alt="" class="w-3.5 h-3.5 object-contain" />
             Desc
+          </button>
+          <button class="flex-1 py-2 rounded-xl text-[10px] font-semibold glass text-pink-300 hover:bg-pink-500/20 active:scale-95 transition-all flex items-center justify-center gap-1" onclick={() => { openMensaje = true; notaMensaje = nota }}>
+            <img src="https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-lp9vjuXTCqeB9yhVXBoBmyqdy8e9jv.png" alt="" class="w-3.5 h-3.5 object-contain" />
+            Mensaje
           </button>
         </div>
       </div>

@@ -4,6 +4,7 @@
   import Register from './lib/components/auth/Register.svelte'
   import Periodos from './lib/components/grades/Periodos.svelte'
   import ThreeBackground from './lib/components/ui/ThreeBackground.svelte'
+  import Notifications from './lib/components/ui/Notifications.svelte'
   import { authApi, gradesApi, convivenciaApi } from './lib/services/api'
   import { setUser, updateUserFull } from './lib/stores.svelte'
   import Swal from 'sweetalert2'
@@ -28,6 +29,57 @@
   let convivencia = $state<any[]>([])
 
   let showPeriodTabs = $state('UNO')
+  let refreshing = $state(false)
+
+  let linkedStudents = $state<any[]>([])
+  let currentStudentIdx = $state(0)
+
+  let touchStartY = $state(0)
+  let touchDeltaY = $state(0)
+  let isPulling = $state(false)
+
+  const SESSION_KEY = 'notasie_session'
+
+  function saveSession() {
+    const data = { estudiante, nombres, nivel, numero, periodo, asignacion, photoURL, email, showPeriodTabs, dataEstudiante, linkedStudents, currentStudentIdx }
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(data))
+  }
+
+  function loadSession(): any {
+    try {
+      const raw = sessionStorage.getItem(SESSION_KEY)
+      return raw ? JSON.parse(raw) : null
+    } catch { return null }
+  }
+
+  function clearSession() {
+    sessionStorage.removeItem(SESSION_KEY)
+  }
+
+  onMount(async () => {
+    const session = loadSession()
+    if (session?.estudiante && session?.nombres) {
+      appLoading = true
+      estudiante = session.estudiante
+      nombres = session.nombres
+      nivel = session.nivel || ''
+      numero = session.numero || ''
+      periodo = session.periodo || ''
+      asignacion = session.asignacion || '1'
+      photoURL = session.photoURL || ''
+      email = session.email || ''
+      showPeriodTabs = session.showPeriodTabs || 'UNO'
+      dataEstudiante = session.dataEstudiante || null
+      linkedStudents = session.linkedStudents || []
+      currentStudentIdx = session.currentStudentIdx || 0
+      setUser({ displayName: session.nombres, email: session.email || '', photoURL: session.photoURL || '', phoneNumber: '' })
+      if (session.dataEstudiante) updateUserFull({ ...session.dataEstudiante })
+      block = 'periodos'
+      await loadNotas(showPeriodTabs)
+      await loadConvivencia()
+      appLoading = false
+    }
+  })
 
   function isMobile() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
@@ -66,6 +118,41 @@
 
   async function loadConvivencia() {
     convivencia = await convivenciaApi.getConvivencia(estudiante)
+  }
+
+  async function refreshData() {
+    refreshing = true
+    if (showPeriodTabs === 'Estadisticas') {
+      await handleTabChange('Estadisticas')
+    } else if (showPeriodTabs === 'Concentrador') {
+      notas = await gradesApi.getNotas('UNO', estudiante)
+    } else {
+      await loadNotas(showPeriodTabs)
+    }
+    await loadConvivencia()
+    refreshing = false
+  }
+
+  function handleTouchStart(e: TouchEvent) {
+    if (window.scrollY === 0) {
+      touchStartY = e.touches[0].clientY
+    }
+  }
+
+  function handleTouchMove(e: TouchEvent) {
+    if (window.scrollY === 0 && touchStartY > 0) {
+      touchDeltaY = Math.max(0, e.touches[0].clientY - touchStartY)
+      isPulling = touchDeltaY > 10
+    }
+  }
+
+  async function handleTouchEnd() {
+    if (touchDeltaY > 80 && !refreshing) {
+      await refreshData()
+    }
+    touchStartY = 0
+    touchDeltaY = 0
+    isPulling = false
   }
 
   async function loginSubmit() {
@@ -108,12 +195,15 @@
       asignacion = loginData.asignacion || '1'
       photoURL = data.photoURL || ''
       email = data.email || ''
+      linkedStudents = [{ estudiante: loginData.estudiante, nombres: loginData.nombres, nivel: data.nivel, numero: data.numero, photoURL: data.photoURL }]
+      currentStudentIdx = 0
       setUser({ displayName: loginData.nombres, email: data.email || '', photoURL: data.photoURL || '', phoneNumber: data.movil || '' })
       updateUserFull({ ...data })
       block = 'periodos'
       showPeriodTabs = loginData.periodo || 'UNO'
       await loadNotas(showPeriodTabs)
       await loadConvivencia()
+      saveSession()
       appLoading = false
       Swal.fire({
         title: 'Bienvenido',
@@ -136,17 +226,46 @@
     showPeriodTabs = p
     if (p === 'Concentrador') {
       notas = await gradesApi.getNotas('UNO', estudiante)
+    } else if (p === 'Estadisticas') {
+      // Cargar notas de todos los periodos para estadísticas completas
+      const periodos = ['UNO', 'DOS', 'TRES', 'CUATRO', 'FINAL']
+      const todas: any[] = []
+      for (const per of periodos) {
+        const n = await gradesApi.getNotas(per, estudiante)
+        if (n.length > 0) todas.push(...n)
+      }
+      // Deduplicar por asignatura, manteniendo el último valor encontrado
+      const seen = new Map<string, any>()
+      for (const t of todas) seen.set(t.asignatura, t)
+      notas = Array.from(seen.values())
     } else if (p !== 'Convivencia') {
       await loadNotas(p)
     }
   }
 
+  async function switchStudent(idx: number) {
+    if (idx === currentStudentIdx || idx < 0 || idx >= linkedStudents.length) return
+    const s = linkedStudents[idx]
+    currentStudentIdx = idx
+    estudiante = s.estudiante
+    nombres = s.nombres
+    nivel = s.nivel
+    numero = s.numero
+    photoURL = s.photoURL || ''
+    await loadNotas(showPeriodTabs)
+    await loadConvivencia()
+    saveSession()
+  }
+
   function handleLogout() {
+    clearSession()
     block = ''
     notas = []
     convivencia = []
     estudiante = ''
     nombres = ''
+    linkedStudents = []
+    currentStudentIdx = 0
   }
 
   function handleRegisterClose() {
@@ -155,7 +274,22 @@
 </script>
 
 <ThreeBackground />
-<main class="relative min-h-screen z-10">
+<main
+  class="relative min-h-screen z-10"
+  ontouchstart={handleTouchStart}
+  ontouchmove={handleTouchMove}
+  ontouchend={handleTouchEnd}
+>
+  {#if refreshing || isPulling}
+    <div class="fixed top-0 left-0 right-0 z-[80] flex items-center justify-center transition-all duration-200" style="height: {Math.min(touchDeltaY, 100)}px; opacity: {Math.min(touchDeltaY / 80, 1)}">
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5 text-indigo-400 {refreshing ? 'animate-spin' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={!refreshing ? `transform: rotate(${Math.min(touchDeltaY * 2, 180)}deg)` : ''}>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        <span class="text-xs text-slate-400">{refreshing ? 'Actualizando...' : 'Suelta para actualizar'}</span>
+      </div>
+    </div>
+  {/if}
   {#if appLoading}
     <div class="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
       <div class="flex flex-col items-center gap-5">
@@ -165,7 +299,7 @@
           <div class="absolute inset-2 w-16 h-16 rounded-full border-4 border-transparent border-t-pink-500 animate-spin" style="animation-duration: 2s;"></div>
         </div>
         <div class="text-center">
-          <p class="text-sm text-white font-semibold">Cargando datos academico</p>
+          <p class="text-sm text-white font-semibold">Cargando datos académicos</p>
           <p class="text-xs text-slate-400 mt-1">Un momento por favor...</p>
         </div>
       </div>
@@ -178,6 +312,11 @@
       {nombres}
       title={nivel && numero ? `${nivel}-${numero}` : ''}
       onLogout={handleLogout}
+      {refreshing}
+      onRefresh={refreshData}
+      {linkedStudents}
+      {currentStudentIdx}
+      onSwitchStudent={switchStudent}
     />
   {/if}
 
@@ -201,18 +340,18 @@
           <form class="space-y-4" onsubmit={(e) => { e.preventDefault(); loginSubmit() }}>
             <div class="animate-in slide-in-from-left-4 duration-500 delay-700">
               <div class="relative group">
-                <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+                <div class="absolute left-3 top-1/2 -translate-y-1/2">
+                  <img src="https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-dae1lHATNY8hkh3GxeAnScrtd34Ii5.png" alt="" class="w-6 h-6 object-contain" />
                 </div>
-                <input type="text" bind:value={usu} placeholder="Documento de identidad" class="w-full pl-12 pr-4 py-3.5 rounded-2xl glass border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all" />
+                <input type="text" bind:value={usu} placeholder="Documento de identidad" class="w-full pl-11 pr-4 py-3.5 rounded-2xl glass border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all" />
               </div>
             </div>
             <div class="animate-in slide-in-from-right-4 duration-500 delay-[800ms]">
               <div class="relative group">
-                <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-purple-400 transition-colors">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                <div class="absolute left-3 top-1/2 -translate-y-1/2">
+                  <img src="https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-1ZcsBwwKPF9lpnaWTFwUAmxkHIeKXD.png" alt="" class="w-6 h-6 object-contain" />
                 </div>
-                <input type="password" bind:value={cla} placeholder="Contrasena" class="w-full pl-12 pr-4 py-3.5 rounded-2xl glass border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all" />
+                <input type="password" bind:value={cla} placeholder="Contrasena" class="w-full pl-11 pr-4 py-3.5 rounded-2xl glass border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all" />
               </div>
             </div>
             {#if loging}
@@ -224,7 +363,7 @@
               <div class="animate-in slide-in-from-bottom-4 duration-500 delay-[900ms]">
                 <button type="submit" class="group relative w-full py-4 rounded-2xl font-bold text-sm bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white transition-all duration-300 active:scale-[0.98] shadow-lg shadow-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/50 overflow-hidden">
                   <span class="relative z-10 flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    <img src="https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-TL7loecwMkvBVppFbrNBWhOuzhKwtB.png" alt="" class="w-5 h-5 object-contain" />
                     Entrar
                   </span>
                   <div class="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -267,6 +406,12 @@
       {showPeriodTabs}
       onTabChange={handleTabChange}
       {convivencia}
+      {refreshing}
+      onRefresh={refreshData}
     />
+  {/if}
+
+  {#if block === 'periodos'}
+    <Notifications {notas} {convivencia} {estudiante} />
   {/if}
 </main>
