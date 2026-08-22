@@ -76,39 +76,35 @@
         <div class="flex items-start justify-between gap-3 mb-3">
           <div class="flex items-center gap-2 flex-1 min-w-0">
             <img src="https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-QhvfavmoGfPmREwwvl4XtqTIORARDz.png" alt="" class="w-8 h-8 object-contain flex-shrink-0" />
-            <div class="min-w-0">
-              <h4 class="text-sm font-bold text-white truncate">{nota.asignatura}</h4>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h4 class="text-sm font-bold text-white truncate">{nota.asignatura}</h4>
+                {#if menorInfo.hasData}
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md {parseFloat(menorInfo.menor) < 3 ? 'bg-red-500/15 border border-red-500/20' : 'bg-white/5 border border-white/5'}">
+                    <span class="text-[9px] {parseFloat(menorInfo.menor) < 3 ? 'text-red-400' : 'text-slate-400'}">menor:</span>
+                    <span class="text-[9px] font-bold {parseFloat(menorInfo.menor) < 3 ? 'text-red-400' : 'text-slate-300'}">{menorInfo.menor}</span>
+                    {#if menorInfo.aspecto}
+                      <span class="text-[8px] text-slate-500 hidden sm:inline">({menorInfo.aspecto})</span>
+                    {/if}
+                  </span>
+                {/if}
+              </div>
               <p class="text-xs text-slate-400 mt-0.5 truncate">{nota.docente}</p>
             </div>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="relative group flex-shrink-0">
             {#if showWarning}
-              <div class="relative group">
-                <div class="absolute -top-1 -right-1 z-10 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center shadow-lg shadow-red-500/40 animate-pulse">
-                  <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                </div>
-                <div class="absolute -bottom-8 left-1/2 -translate-x-1/2 z-20 glass-strong rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-red-500/20">
-                  <span class="text-[9px] text-red-300 font-medium">{menorInfo.aspecto || 'Nota'}: {menorInfo.menor}</span>
-                </div>
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-br {gradeColor(nota.valoracion)} flex items-center justify-center shadow-lg relative overflow-hidden">
-                  <div class="absolute inset-0 border-2 border-red-500/50 rounded-xl"></div>
-                  <span class="text-sm font-bold text-white">{fmt(nota.valoracion)}</span>
-                </div>
+              <div class="absolute -top-1 -right-1 z-10 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center shadow-lg shadow-red-500/40 animate-pulse">
+                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
               </div>
-            {:else}
-              <div class="w-12 h-12 rounded-xl bg-gradient-to-br {gradeColor(nota.valoracion)} flex items-center justify-center shadow-lg">
-                <span class="text-sm font-bold text-white">{fmt(nota.valoracion)}</span>
+              <div class="absolute -bottom-8 left-1/2 -translate-x-1/2 z-20 glass-strong rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-red-500/20">
+                <span class="text-[9px] text-red-300 font-medium">{menorInfo.aspecto || 'Nota'}: {menorInfo.menor}</span>
               </div>
             {/if}
-            {#if menorInfo.hasData}
-              <div class="text-right min-w-0">
-                <span class="text-[9px] text-slate-500">menor</span>
-                <p class="text-xs font-bold {parseFloat(menorInfo.menor) < 3 ? 'text-red-400' : 'text-slate-300'}">{menorInfo.menor}</p>
-                {#if menorInfo.aspecto}
-                  <p class="text-[9px] text-slate-500 truncate max-w-[80px]" title="{menorInfo.aspecto}">{menorInfo.aspecto}</p>
-                {/if}
-              </div>
-            {/if}
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br {gradeColor(nota.valoracion)} flex items-center justify-center shadow-lg {showWarning ? 'relative overflow-hidden' : ''}">
+              {#if showWarning}<div class="absolute inset-0 border-2 border-red-500/50 rounded-xl"></div>{/if}
+              <span class="text-sm font-bold text-white">{fmt(nota.valoracion)}</span>
+            </div>
           </div>
         </div>
         <div class="flex gap-1.5">
