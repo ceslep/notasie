@@ -26,6 +26,7 @@
 
   let dataEstudiante = $state<any>(null)
   let notas = $state<any[]>([])
+  let notasLoaded = $state(false)
   let convivencia = $state<any[]>([])
   let notasDetalladas = $state<Record<string, any[]>>({})
 
@@ -115,6 +116,7 @@
 
   async function loadNotas(p: string) {
     notas = await gradesApi.getNotas(p, estudiante)
+    notasLoaded = true
     // Cargar notas detalladas de cada materia en paralelo
     const detMap: Record<string, any[]> = {}
     await Promise.all(
@@ -345,11 +347,6 @@
 
   {#if block === ''}
     <div class="flex flex-col items-center justify-center min-h-[90vh] px-6 py-12">
-      <div class="animate-in zoom-in duration-700 delay-200">
-        <h1 class="text-3xl sm:text-4xl font-extrabold gradient-text text-center mb-2 tracking-tight leading-tight">I.E. de Occidente</h1>
-        <p class="text-slate-500 text-[10px] text-center mb-8 tracking-[0.3em] uppercase">Plataforma Academica</p>
-      </div>
-
       <div class="w-full max-w-sm mx-auto animate-in slide-in-from-bottom-8 duration-700 delay-300">
         <div class="glass-strong rounded-3xl p-6 sm:p-8 glow-card">
           <div class="text-center mb-6">
@@ -425,6 +422,7 @@
       {asignacion}
       {nombres}
       {notas}
+      {notasLoaded}
       {notasDetalladas}
       {showPeriodTabs}
       onTabChange={handleTabChange}

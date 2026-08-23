@@ -15,6 +15,37 @@
   let openMensaje = $state(false)
   let notaMensaje = $state<any>(null)
 
+  const STORAGE_KEY = 'notasie_favorites'
+  let favorites = $state<string[]>([])
+
+  function loadFavorites() {
+    try {
+      const data = localStorage.getItem(`${STORAGE_KEY}_${estudiante}`)
+      favorites = data ? JSON.parse(data) : []
+    } catch { favorites = [] }
+  }
+
+  function toggleFav(asignatura: string) {
+    const idx = favorites.indexOf(asignatura)
+    if (idx >= 0) {
+      favorites = favorites.filter(f => f !== asignatura)
+    } else {
+      favorites = [...favorites, asignatura]
+    }
+    try { localStorage.setItem(`${STORAGE_KEY}_${estudiante}`, JSON.stringify(favorites)) } catch {}
+  }
+
+  $effect(() => { if (estudiante) loadFavorites() })
+
+  let notasSorted = $derived(() => {
+    const favSet = new Set(favorites)
+    return [...notas].sort((a, b) => {
+      const af = favSet.has(a.asignatura) ? 0 : 1
+      const bf = favSet.has(b.asignatura) ? 0 : 1
+      return af - bf
+    })
+  })
+
   const show = (m: string, n: any) => { activeModal = m; notaSel = n }
   const close = () => { activeModal = ''; notaSel = null }
 
@@ -68,10 +99,11 @@
 {/if}
 
 <div class="space-y-3">
-  {#each notas as nota, i}
+  {#each notasSorted() as nota, i}
     {@const menorInfo = getMinorInfo(nota)}
     {@const showWarning = menorInfo.hasData && parseFloat(menorInfo.menor) < 3}
-    <div class="glass rounded-2xl overflow-hidden border border-white/5 animate-slide-up" style="animation-delay: {i * 50}ms">
+    {@const isFav = favorites.includes(nota.asignatura)}
+    <div class="glass rounded-2xl overflow-hidden border animate-slide-up {isFav ? 'border-amber-500/30' : 'border-white/5'}" style="animation-delay: {i * 50}ms">
       <div class="p-4">
         <div class="flex items-start justify-between gap-3 mb-3">
           <div class="flex items-center gap-2 flex-1 min-w-0">
@@ -92,18 +124,24 @@
               <p class="text-xs text-slate-400 mt-0.5 truncate">{nota.docente}</p>
             </div>
           </div>
-          <div class="relative group flex-shrink-0">
-            {#if showWarning}
-              <div class="absolute -top-1 -right-1 z-10 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center shadow-lg shadow-red-500/40 animate-pulse">
-                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <button class="p-1.5 rounded-lg transition-all {isFav ? 'bg-amber-500/20' : 'bg-white/5 hover:bg-white/10'}" onclick={() => toggleFav(nota.asignatura)}>
+              {#if isFav}
+                <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              {:else}
+                <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+              {/if}
+            </button>
+            <div class="relative group">
+              {#if showWarning}
+                <div class="absolute -top-1 -right-1 z-10 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center shadow-lg shadow-red-500/40 animate-pulse">
+                  <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                </div>
+              {/if}
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br {gradeColor(nota.valoracion)} flex items-center justify-center shadow-lg {showWarning ? 'relative overflow-hidden' : ''}">
+                {#if showWarning}<div class="absolute inset-0 border-2 border-red-500/50 rounded-xl"></div>{/if}
+                <span class="text-sm font-bold text-white">{fmt(nota.valoracion)}</span>
               </div>
-              <div class="absolute -bottom-8 left-1/2 -translate-x-1/2 z-20 glass-strong rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-red-500/20">
-                <span class="text-[9px] text-red-300 font-medium">{menorInfo.aspecto || 'Nota'}: {menorInfo.menor}</span>
-              </div>
-            {/if}
-            <div class="w-12 h-12 rounded-xl bg-gradient-to-br {gradeColor(nota.valoracion)} flex items-center justify-center shadow-lg {showWarning ? 'relative overflow-hidden' : ''}">
-              {#if showWarning}<div class="absolute inset-0 border-2 border-red-500/50 rounded-xl"></div>{/if}
-              <span class="text-sm font-bold text-white">{fmt(nota.valoracion)}</span>
             </div>
           </div>
         </div>

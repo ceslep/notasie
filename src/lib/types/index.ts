@@ -62,6 +62,7 @@ export interface ConvivenciaDetalle {
   cv_positivos: string
   cv_firma: string
   firmaAcudiente: string
+  infoFirmaAcudiente: string
   cv_fechahora: string
 }
 

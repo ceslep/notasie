@@ -8,8 +8,8 @@
   import ModalPuestos from '../modals/ModalPuestos.svelte'
   import ReportExporter from '../ui/ReportExporter.svelte'
 
-  let { estudiante, nivel, numero, asignacion, nombres, notas = [], notasDetalladas = {}, showPeriodTabs = 'UNO', onTabChange, convivencia = [], refreshing = false, onRefresh }: {
-    estudiante: string; nivel: string; numero: string; asignacion: string; nombres: string; notas?: any[]; notasDetalladas?: Record<string, any[]>; showPeriodTabs?: string; onTabChange?: (p: string) => void; convivencia?: any[]; refreshing?: boolean; onRefresh?: () => void
+  let { estudiante, nivel, numero, asignacion, nombres, notas = [], notasLoaded = false, notasDetalladas = {}, showPeriodTabs = 'UNO', onTabChange, convivencia = [], refreshing = false, onRefresh }: {
+    estudiante: string; nivel: string; numero: string; asignacion: string; nombres: string; notas?: any[]; notasLoaded?: boolean; notasDetalladas?: Record<string, any[]>; showPeriodTabs?: string; onTabChange?: (p: string) => void; convivencia?: any[]; refreshing?: boolean; onRefresh?: () => void
   } = $props()
 
   const tabs = [
@@ -118,14 +118,28 @@
     {:else if showPeriodTabs === 'Estadisticas'}
       <Estadisticas {notas} {convivencia} {estudiante} {nivel} />
     {:else if showPeriodTabs === 'Concentrador'}
-      {#if notas.length > 0}
-        <ListaNotasConcentrador notas={notas.map(n => ({ asignatura: n.asignatura, periodo: n.periodo, valoracion: n.valoracion, desempeno: n.desempeno }))} />
+      {#if notasLoaded}
+        {#if notas.length > 0}
+          <ListaNotasConcentrador notas={notas.map(n => ({ asignatura: n.asignatura, periodo: n.periodo, valoracion: n.valoracion, desempeno: n.desempeno }))} />
+        {:else}
+          <div class="glass rounded-2xl p-8 text-center border border-white/5">
+            <img src="https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-QhvfavmoGfPmREwwvl4XtqTIORARDz.png" alt="" class="w-12 h-12 object-contain mx-auto mb-3 opacity-40" />
+            <p class="text-sm text-slate-400">No hay notas para este periodo</p>
+          </div>
+        {/if}
       {:else}
         <Spn />
       {/if}
     {:else}
-      {#if notas.length > 0}
-        <ListaNotas {notas} {notasDetalladas} {estudiante} {asignacion} {nombres} periodo={showPeriodTabs} {nivel} />
+      {#if notasLoaded}
+        {#if notas.length > 0}
+          <ListaNotas {notas} {notasDetalladas} {estudiante} {asignacion} {nombres} periodo={showPeriodTabs} {nivel} />
+        {:else}
+          <div class="glass rounded-2xl p-8 text-center border border-white/5">
+            <img src="https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-QhvfavmoGfPmREwwvl4XtqTIORARDz.png" alt="" class="w-12 h-12 object-contain mx-auto mb-3 opacity-40" />
+            <p class="text-sm text-slate-400">No hay notas para este periodo</p>
+          </div>
+        {/if}
       {:else}
         <Spn />
       {/if}
