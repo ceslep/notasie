@@ -47,6 +47,8 @@ export const gradesApi = {
     apiPost<any[]>('/est/php/GetPromedios.php', { estudiante, periodo, asignacion }),
   getPromedioGeneral: (estudiante: string, periodo: string, asignacion: string) =>
     apiPost<any[]>('/est/php/GetPromedioGeneral.php', { estudiante, periodo, asignacion }),
+  getInfoAcad: (asignacion: string, nivel: number, valoract: number, asignatura: string, periodo: string, HED: string, grado: string) =>
+    apiPost<{ desempeno: string; descripcion: string }>('/est/php/getInfoAcad.php', { asignacion, nivel, valoract, asignatura, periodo, HED, grado }),
 }
 
 export const puestosApi = {
@@ -63,11 +65,6 @@ export const convivenciaApi = {
     apiPost<any[]>('/consolidadoConvivenciaEstudiante.php', { estudiante, year }),
   getDetallado: (ind: string, year: number) =>
     apiPost<any[]>('/convivenciaDetallado.php', { ind, year }),
-}
-
-export const mapApi = {
-  getDataMap: () =>
-    apiPost<any[]>('/est/php/GetDataMap.php', {}),
 }
 
 export const reclamoApi = {

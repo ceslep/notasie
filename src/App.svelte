@@ -92,24 +92,13 @@
     return (await r.json()).ip
   }
 
-  async function getCoords() {
-    if (navigator.geolocation) {
-      return new Promise<any>((resolve) => {
-        navigator.geolocation.getCurrentPosition(resolve, () => resolve(null))
-      })
-    }
-    return null
-  }
-
   async function saveLog(data: any) {
     try {
-      const position = await getCoords()
       await authApi.saveLog({
         estudiante: data.estudiante ?? data.identificacion,
         nombres: data.nombres, nivel: data.nivel, numero: data.numero,
         movil: isMobile() ? 'si' : 'no', userAgent: navigator.userAgent,
         ip: await getIP(),
-        coords: position ? `${position.coords.latitude},${position.coords.longitude}` : '',
       })
     } catch {}
   }
@@ -429,6 +418,7 @@
       {convivencia}
       {refreshing}
       onRefresh={refreshData}
+      HED={dataEstudiante?.HED || ''}
     />
   {/if}
 

@@ -8,8 +8,8 @@
   import ModalPuestos from '../modals/ModalPuestos.svelte'
   import ReportExporter from '../ui/ReportExporter.svelte'
 
-  let { estudiante, nivel, numero, asignacion, nombres, notas = [], notasLoaded = false, notasDetalladas = {}, showPeriodTabs = 'UNO', onTabChange, convivencia = [], refreshing = false, onRefresh }: {
-    estudiante: string; nivel: string; numero: string; asignacion: string; nombres: string; notas?: any[]; notasLoaded?: boolean; notasDetalladas?: Record<string, any[]>; showPeriodTabs?: string; onTabChange?: (p: string) => void; convivencia?: any[]; refreshing?: boolean; onRefresh?: () => void
+  let { estudiante, nivel, numero, asignacion, nombres, notas = [], notasLoaded = false, notasDetalladas = {}, showPeriodTabs = 'UNO', onTabChange, convivencia = [], refreshing = false, onRefresh, HED = '' }: {
+    estudiante: string; nivel: string; numero: string; asignacion: string; nombres: string; notas?: any[]; notasLoaded?: boolean; notasDetalladas?: Record<string, any[]>; showPeriodTabs?: string; onTabChange?: (p: string) => void; convivencia?: any[]; refreshing?: boolean; onRefresh?: () => void; HED?: string
   } = $props()
 
   const tabs = [
@@ -133,7 +133,7 @@
     {:else}
       {#if notasLoaded}
         {#if notas.length > 0}
-          <ListaNotas {notas} {notasDetalladas} {estudiante} {asignacion} {nombres} periodo={showPeriodTabs} {nivel} />
+          <ListaNotas {notas} {notasDetalladas} {estudiante} {asignacion} {nombres} periodo={showPeriodTabs} {nivel} {HED} {numero} />
         {:else}
           <div class="glass rounded-2xl p-8 text-center border border-white/5">
             <img src="https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-QhvfavmoGfPmREwwvl4XtqTIORARDz.png" alt="" class="w-12 h-12 object-contain mx-auto mb-3 opacity-40" />

@@ -1,13 +1,11 @@
 <script lang="ts">
   import ModalViewFoto from './modals/ModalViewFoto.svelte'
-  import ModalMap from './modals/ModalMap.svelte'
 
   let { photoURL = '', nombres = '', title = '', onLogout, onLogin, onRegister, showActions = true, refreshing = false, onRefresh, linkedStudents = [], currentStudentIdx = 0, onSwitchStudent }: {
     photoURL?: string; nombres?: string; title?: string; onLogout?: () => void; onLogin?: () => void; onRegister?: () => void; showActions?: boolean; refreshing?: boolean; onRefresh?: () => void; linkedStudents?: { name: string; grade?: string }[]; currentStudentIdx?: number; onSwitchStudent?: (idx: number) => void
   } = $props()
 
   let openFoto = $state(false)
-  let openMap = $state(false)
   let showSwitcher = $state(false)
   const isLoggedIn = $derived(nombres !== '')
 
@@ -18,10 +16,6 @@
 
 {#if openFoto}
   <ModalViewFoto {photoURL} onClose={() => openFoto = false} />
-{/if}
-
-{#if openMap}
-  <ModalMap onClose={() => openMap = false} />
 {/if}
 
 <nav class="sticky top-0 z-50 glass-strong border-b border-white/5">
@@ -54,9 +48,6 @@
           <div class="hidden relative w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center ring-2 ring-white/20">
             <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
           </div>
-        </button>
-        <button onclick={() => openMap = true} class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-all" title="Mapa">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         </button>
         <button onclick={() => onRefresh?.()} class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-all" title="Actualizar" disabled={refreshing}>
           <svg class="w-4 h-4 {refreshing ? 'animate-spin' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>

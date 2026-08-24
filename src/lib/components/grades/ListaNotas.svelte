@@ -1,19 +1,22 @@
 ﻿<script lang="ts">
   import type { Nota } from '$lib/types'
+  import { gradesApi } from '$lib/services/api'
   import ModalNotas from '../modals/ModalNotas.svelte'
   import ModalInas from '../modals/ModalInas.svelte'
   import ModalExcusas from '../modals/ModalExcusas.svelte'
   import ModalDescripcion from '../modals/ModalDescripcion.svelte'
   import MensajeAlProfesor from '../modals/MensajeAlProfesor.svelte'
 
-  let { notas = [], notasDetalladas = {}, estudiante = '', periodo = '', nivel = '', asignacion = '', nombres = '' }: {
-    notas: Nota[]; notasDetalladas?: Record<string, any[]>; estudiante: string; periodo: string; nivel: string; asignacion?: string; nombres?: string
+  let { notas = [], notasDetalladas = {}, estudiante = '', periodo = '', nivel = '', asignacion = '', nombres = '', HED = '', numero = '' }: {
+    notas: Nota[]; notasDetalladas?: Record<string, any[]>; estudiante: string; periodo: string; nivel: string; asignacion?: string; nombres?: string; HED?: string; numero?: string
   } = $props()
 
   let activeModal = $state('')
   let notaSel = $state<any>(null)
   let openMensaje = $state(false)
   let notaMensaje = $state<any>(null)
+  let infoAcadMap = $state<Record<string, { desempeno: string; descripcion: string }>>({})
+  let infoAcadLoading = $state(false)
 
   const STORAGE_KEY = 'notasie_favorites'
   let favorites = $state<string[]>([])
@@ -36,6 +39,25 @@
   }
 
   $effect(() => { if (estudiante) loadFavorites() })
+
+  $effect(() => {
+    if (notas.length === 0 || !periodo || !asignacion || !nivel) return
+    infoAcadLoading = true
+    const nivelInt = parseInt(nivel) || 0
+    const grado = `${nivel}-${numero}`
+    Promise.all(
+      notas.map(async (n) => {
+        const valoract = parseFloat(n.valoracion) || 0
+        const result = await gradesApi.getInfoAcad(asignacion, nivelInt, valoract, n.asignatura, periodo, HED, grado)
+        return { asignatura: n.asignatura, ...result }
+      })
+    ).then((results) => {
+      const map: Record<string, { desempeno: string; descripcion: string }> = {}
+      for (const r of results) map[r.asignatura] = { desempeno: r.desempeno, descripcion: r.descripcion }
+      infoAcadMap = map
+      infoAcadLoading = false
+    }).catch(() => { infoAcadLoading = false })
+  })
 
   let notasSorted = $derived(() => {
     const favSet = new Set(favorites)
@@ -62,6 +84,14 @@
     return 'text-red-400'
   }
   const fmt = (v: string) => parseFloat(v || '0').toFixed(1)
+
+  const desempenoColor = (d: string) => {
+    const v = d.toUpperCase()
+    if (v === 'SUPERIOR' || v === 'ALTO') return 'bg-emerald-500/15 border-emerald-500/25 text-emerald-300'
+    if (v === 'BASICO') return 'bg-amber-500/15 border-amber-500/25 text-amber-300'
+    if (v === 'BAJO') return 'bg-red-500/15 border-red-500/25 text-red-300'
+    return 'bg-white/10 border-white/10 text-slate-300'
+  }
 
   // Obtener la menor nota real de las notas detalladas del estudiante
   function getMinorInfo(nota: any): { menor: string; aspecto: string; hasData: boolean } {
@@ -98,7 +128,15 @@
   <MensajeAlProfesor docente={notaMensaje.docente} asignatura={notaMensaje.asignatura} onClose={() => { openMensaje = false; notaMensaje = null }} />
 {/if}
 
-<div class="space-y-3">
+<div class="space-y-3 relative">
+  {#if infoAcadLoading}
+    <div class="absolute inset-0 z-20 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm rounded-2xl">
+      <div class="flex items-center gap-2">
+        <div class="w-4 h-4 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin"></div>
+        <span class="text-xs text-slate-300">Cargando info academica...</span>
+      </div>
+    </div>
+  {/if}
   {#each notasSorted() as nota, i}
     {@const menorInfo = getMinorInfo(nota)}
     {@const showWarning = menorInfo.hasData && parseFloat(menorInfo.menor) < 3}
@@ -122,6 +160,14 @@
                 {/if}
               </div>
               <p class="text-xs text-slate-400 mt-0.5 truncate">{nota.docente}</p>
+              {#if infoAcadMap[nota.asignatura]?.desempeno}
+                <div class="mt-1.5 px-2 py-1 rounded-lg border {desempenoColor(infoAcadMap[nota.asignatura].desempeno)}">
+                  <span class="text-[10px] font-bold uppercase">{infoAcadMap[nota.asignatura].desempeno}</span>
+                  {#if infoAcadMap[nota.asignatura]?.descripcion}
+                    <p class="text-[9px] text-slate-400 mt-0.5 leading-tight">{infoAcadMap[nota.asignatura].descripcion}</p>
+                  {/if}
+                </div>
+              {/if}
             </div>
           </div>
           <div class="flex items-center gap-2 flex-shrink-0">
