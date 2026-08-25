@@ -64,27 +64,37 @@
     const session = loadSession()
     if (session?.estudiante && session?.nombres) {
       appLoading = true
-      estudiante = session.estudiante
-      nombres = session.nombres
-      nivel = session.nivel || ''
-      numero = session.numero || ''
-      periodo = session.periodo || ''
-      asignacion = session.asignacion || '1'
-      photoURL = session.photoURL || ''
-      email = session.email || ''
-      showPeriodTabs = session.showPeriodTabs || 'UNO'
-      dataEstudiante = session.dataEstudiante || null
-      linkedStudents = session.linkedStudents || []
-      currentStudentIdx = session.currentStudentIdx || 0
-      setUser({ displayName: session.nombres, email: session.email || '', photoURL: session.photoURL || '', phoneNumber: '' })
-      if (session.dataEstudiante) updateUserFull({ ...session.dataEstudiante })
-      sessionStartTime = Date.now()
-      identifyStudent(session.estudiante, { nombre: session.nombres, nivel: session.nivel, email: session.email })
-      trackPageView('app_restored', { period: session.showPeriodTabs })
-      block = 'periodos'
-      await loadNotas(showPeriodTabs)
-      await loadConvivencia()
-      appLoading = false
+      try {
+        estudiante = session.estudiante
+        nombres = session.nombres
+        nivel = session.nivel || ''
+        numero = session.numero || ''
+        periodo = session.periodo || ''
+        asignacion = session.asignacion || '1'
+        photoURL = session.photoURL || ''
+        email = session.email || ''
+        showPeriodTabs = session.showPeriodTabs || 'UNO'
+        dataEstudiante = session.dataEstudiante || null
+        linkedStudents = session.linkedStudents || []
+        currentStudentIdx = session.currentStudentIdx || 0
+        setUser({ displayName: session.nombres, email: session.email || '', photoURL: session.photoURL || '', phoneNumber: '' })
+        if (session.dataEstudiante) updateUserFull({ ...session.dataEstudiante })
+        sessionStartTime = Date.now()
+        identifyStudent(session.estudiante, { nombre: session.nombres, nivel: session.nivel, email: session.email })
+        trackPageView('app_restored', { period: session.showPeriodTabs })
+        block = 'periodos'
+        await loadNotas(showPeriodTabs)
+        await loadConvivencia()
+      } catch {
+        clearSession()
+        block = ''
+        notas = []
+        convivencia = []
+        estudiante = ''
+        nombres = ''
+      } finally {
+        appLoading = false
+      }
     } else {
       trackPageView('landing')
     }
@@ -194,42 +204,53 @@
   async function handleLogin(detail: any) {
     if (detail.text === 'Aceptar' && detail.result) {
       appLoading = true
-      const loginData = detail.data
-      const drT = detail.dataRegistroT
-      const data = drT.length > 0 ? drT[0] : {}
-      await saveLog(data.nombres ? data : loginData)
-      nombres = loginData.nombres
-      nivel = data.nivel || ''
-      numero = data.numero || ''
-      dataEstudiante = { ...data }
-      estudiante = loginData.estudiante
-      periodo = loginData.periodo
-      asignacion = loginData.asignacion || '1'
-      photoURL = data.photoURL || ''
-      email = data.email || ''
-      linkedStudents = [{ estudiante: loginData.estudiante, nombres: loginData.nombres, nivel: data.nivel, numero: data.numero, photoURL: data.photoURL }]
-      currentStudentIdx = 0
-      setUser({ displayName: loginData.nombres, email: data.email || '', photoURL: data.photoURL || '', phoneNumber: data.movil || '' })
-      updateUserFull({ ...data })
-      sessionStartTime = Date.now()
-      identifyStudent(loginData.estudiante, { nombre: loginData.nombres, nivel: data.nivel, email: data.email })
-      trackPageView('login_success', { student_id: loginData.estudiante, period: loginData.periodo })
-      block = 'periodos'
-      showPeriodTabs = loginData.periodo || 'UNO'
-      await loadNotas(showPeriodTabs)
-      await loadConvivencia()
-      saveSession()
-      appLoading = false
-      Swal.fire({
-        title: 'Bienvenido',
-        text: loginData.nombres,
-        icon: 'success',
-        timer: 1200,
-        showConfirmButton: false,
-        background: '#1e293b',
-        color: '#f8fafc',
-        iconColor: '#10b981',
-      })
+      try {
+        const loginData = detail.data
+        const drT = detail.dataRegistroT
+        const data = drT.length > 0 ? drT[0] : {}
+        await saveLog(data.nombres ? data : loginData)
+        nombres = loginData.nombres
+        nivel = data.nivel || ''
+        numero = data.numero || ''
+        dataEstudiante = { ...data }
+        estudiante = loginData.estudiante
+        periodo = loginData.periodo
+        asignacion = loginData.asignacion || '1'
+        photoURL = data.photoURL || ''
+        email = data.email || ''
+        linkedStudents = [{ estudiante: loginData.estudiante, nombres: loginData.nombres, nivel: data.nivel, numero: data.numero, photoURL: data.photoURL }]
+        currentStudentIdx = 0
+        setUser({ displayName: loginData.nombres, email: data.email || '', photoURL: data.photoURL || '', phoneNumber: data.movil || '' })
+        updateUserFull({ ...data })
+        sessionStartTime = Date.now()
+        identifyStudent(loginData.estudiante, { nombre: loginData.nombres, nivel: data.nivel, email: data.email })
+        trackPageView('login_success', { student_id: loginData.estudiante, period: loginData.periodo })
+        block = 'periodos'
+        showPeriodTabs = loginData.periodo || 'UNO'
+        await loadNotas(showPeriodTabs)
+        await loadConvivencia()
+        saveSession()
+        Swal.fire({
+          title: 'Bienvenido',
+          text: loginData.nombres,
+          icon: 'success',
+          timer: 1200,
+          showConfirmButton: false,
+          background: '#1e293b',
+          color: '#f8fafc',
+          iconColor: '#10b981',
+        })
+      } catch {
+        clearSession()
+        block = ''
+        notas = []
+        convivencia = []
+        estudiante = ''
+        nombres = ''
+        Swal.fire({ title: 'Error', text: 'No se pudieron cargar los datos', icon: 'error', background: '#1e293b', color: '#f8fafc', iconColor: '#ef4444', confirmButtonColor: '#6366f1' })
+      } finally {
+        appLoading = false
+      }
     } else if (detail.text === 'Aceptar' && !detail.result) {
       trackEvent('login_failed')
       Swal.fire({ title: 'Acceso Denegado', icon: 'error', background: '#1e293b', color: '#f8fafc', iconColor: '#ef4444' })
@@ -287,6 +308,7 @@
     resetAnalytics()
     clearSession()
     block = ''
+    loging = false
     trackPageView('login')
     notas = []
     convivencia = []
