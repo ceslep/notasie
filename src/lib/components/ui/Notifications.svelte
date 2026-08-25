@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { trackNotificationOpen } from '$lib/analytics';
 
   let { notas = [], convivencia = [], estudiante = '' } = $props();
 
@@ -66,7 +67,10 @@
 
   function togglePanel() {
     showPanel = !showPanel;
-    if (showPanel) markAllRead();
+    if (showPanel) {
+      markAllRead();
+      trackNotificationOpen(notifications.length);
+    }
   }
 
   const unreadCount = $derived(notifications.filter(n => !n.read).length);

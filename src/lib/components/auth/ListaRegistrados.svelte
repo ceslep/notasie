@@ -19,7 +19,7 @@
     <div class="relative glass-strong rounded-3xl overflow-hidden border border-white/10">
       <div class="p-4 border-b border-white/5 flex items-center justify-between">
         <h3 class="text-sm font-bold text-white">Estudiantes</h3>
-        <button class="text-slate-400 hover:text-white transition-colors" onclick={() => onClose?.()}>
+        <button class="text-slate-400 hover:text-white transition-colors" aria-label="Cerrar" onclick={() => onClose?.()}>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>

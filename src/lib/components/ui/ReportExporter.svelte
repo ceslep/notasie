@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Nota } from '$lib/types'
+  import { trackReportExport } from '$lib/analytics'
 
   let { notas = [], nombres = '', estudiante = '', nivel = '', numero = '', periodo = '' }: {
     notas: Nota[]; nombres: string; estudiante: string; nivel: string; numero: string; periodo: string
@@ -71,6 +72,7 @@
   async function captureAndShare() {
     if (capturing) return
     capturing = true
+    trackReportExport('image', notas.length)
     try {
       const html2canvas = (await import('html2canvas')).default
       const wrapper = document.createElement('div')
@@ -112,6 +114,7 @@
   }
 
   function printReport() {
+    trackReportExport('print', notas.length)
     const hasDocentePrint = notas.some(n => n.docente)
     const html = `<!DOCTYPE html>
 <html lang="es">

@@ -1,13 +1,17 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { Chart, registerables } from 'chart.js'
+  import { trackStatisticsView } from '$lib/analytics'
 
   let { notas = [], convivencia = [], estudiante = '', nivel = '' }: {
     notas?: any[]; convivencia?: any[]; estudiante?: string; nivel?: string
   } = $props()
 
+  // svelte-ignore non_reactive_update
   let barCanvas: HTMLCanvasElement
+  // svelte-ignore non_reactive_update
   let doughnutCanvas: HTMLCanvasElement
+  // svelte-ignore non_reactive_update
   let radarCanvas: HTMLCanvasElement
   let barChart: Chart | null = null
   let doughnutChart: Chart | null = null
@@ -224,6 +228,7 @@
 
   onMount(() => {
     Chart.register(...registerables)
+    trackStatisticsView(notas.length)
     // Build charts once after mount, with a delay to ensure canvases are ready
     if (notas.length > 0) {
       setTimeout(buildCharts, 150)

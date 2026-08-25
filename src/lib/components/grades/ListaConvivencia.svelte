@@ -49,7 +49,7 @@
 {#if showModal}
   {#if loadingDetail}
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick={() => { showModal = false; loadingDetail = false }}></div>
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" role="button" tabindex="-1" onclick={() => { showModal = false; loadingDetail = false }} onkeydown={(e) => e.key === 'Escape' && (() => { showModal = false; loadingDetail = false })()}></div>
       <div class="relative glass-strong w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in duration-300">
         <div class="p-8 flex flex-col items-center gap-4">
           <div class="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>

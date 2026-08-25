@@ -1,5 +1,6 @@
 ﻿<script lang="ts">
   import { gradesApi } from '$lib/services/api'
+  import { trackGradeDetailView } from '$lib/analytics'
   import TableNotas from '../grades/TableNotas.svelte'
   import { onMount } from 'svelte'
 
@@ -14,12 +15,13 @@
     const data = await gradesApi.getNotasDetallado(estudiante, asignatura, periodo)
     ndf = data.filter((n: any) => n.Periodo === periodo)
     nd = ndf.filter((n: any) => n.Nota !== null)
+    trackGradeDetailView(asignatura, nd.length > 0 ? String(nd[0].Nota || '') : '', periodo)
     setTimeout(() => { if (nd.length === 0) onClose?.('no hay notas') }, 1000)
   })
 </script>
 
 <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick={() => onClose?.()}></div>
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" role="button" tabindex="-1" onclick={() => onClose?.()} onkeydown={(e) => e.key === 'Escape' && onClose?.()}></div>
   <div class="relative glass-strong w-full max-w-2xl rounded-3xl border border-white/10 overflow-hidden z-10">
     <div class="p-5 border-b border-white/5 rounded-t-3xl flex items-center justify-between">
       <div>

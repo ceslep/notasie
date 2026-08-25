@@ -17,7 +17,7 @@
 </script>
 
 <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick={() => onClose?.()}></div>
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" role="button" tabindex="-1" onclick={() => onClose?.()} onkeydown={(e) => e.key === 'Escape' && onClose?.()}></div>
   <div class="relative glass-strong w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden z-10">
     <div class="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-5 py-3 rounded-t-3xl flex items-center justify-between">
       <h3 class="text-base font-bold text-white">Inasistencias {asignatura}</h3>

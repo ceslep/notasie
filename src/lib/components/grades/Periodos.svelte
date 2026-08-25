@@ -7,6 +7,7 @@
   import Spn from '../ui/Spn.svelte'
   import ModalPuestos from '../modals/ModalPuestos.svelte'
   import ReportExporter from '../ui/ReportExporter.svelte'
+  import { trackEvent } from '$lib/analytics'
 
   let { estudiante, nivel, numero, asignacion, nombres, notas = [], notasLoaded = false, notasDetalladas = {}, showPeriodTabs = 'UNO', onTabChange, convivencia = [], refreshing = false, onRefresh, HED = '' }: {
     estudiante: string; nivel: string; numero: string; asignacion: string; nombres: string; notas?: any[]; notasLoaded?: boolean; notasDetalladas?: Record<string, any[]>; showPeriodTabs?: string; onTabChange?: (p: string) => void; convivencia?: any[]; refreshing?: boolean; onRefresh?: () => void; HED?: string
@@ -105,7 +106,7 @@
   <div class="overflow-x-auto -mx-4 px-4 pb-3 scrollbar-none">
     <div class="flex gap-2 min-w-max">
       {#each tabs as tab}
-        <button class="flex-shrink-0 px-4 py-2 rounded-xl text-xs font-semibold transition-all {showPeriodTabs === tab.id ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25' : 'glass text-slate-400 hover:text-white hover:bg-white/10'}" onclick={() => onTabChange?.(tab.id)}>
+        <button class="flex-shrink-0 px-4 py-2 rounded-xl text-xs font-semibold transition-all {showPeriodTabs === tab.id ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25' : 'glass text-slate-400 hover:text-white hover:bg-white/10'}" onclick={() => { trackEvent('tab_clicked', { tab: tab.id }); onTabChange?.(tab.id) }}>
           {tab.label}
         </button>
       {/each}

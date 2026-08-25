@@ -7,6 +7,7 @@
   import Notifications from './lib/components/ui/Notifications.svelte'
   import { authApi, gradesApi, convivenciaApi } from './lib/services/api'
   import { setUser, updateUserFull } from './lib/stores.svelte'
+  import { identifyStudent, resetAnalytics, trackPageView, trackLogout, trackEvent } from '$lib/analytics'
   import Swal from 'sweetalert2'
 
   let block = $state('')
@@ -39,6 +40,7 @@
   let touchStartY = $state(0)
   let touchDeltaY = $state(0)
   let isPulling = $state(false)
+  let sessionStartTime = $state(Date.now())
 
   const SESSION_KEY = 'notasie_session'
 
@@ -76,10 +78,15 @@
       currentStudentIdx = session.currentStudentIdx || 0
       setUser({ displayName: session.nombres, email: session.email || '', photoURL: session.photoURL || '', phoneNumber: '' })
       if (session.dataEstudiante) updateUserFull({ ...session.dataEstudiante })
+      sessionStartTime = Date.now()
+      identifyStudent(session.estudiante, { nombre: session.nombres, nivel: session.nivel, email: session.email })
+      trackPageView('app_restored', { period: session.showPeriodTabs })
       block = 'periodos'
       await loadNotas(showPeriodTabs)
       await loadConvivencia()
       appLoading = false
+    } else {
+      trackPageView('landing')
     }
   })
 
@@ -204,6 +211,9 @@
       currentStudentIdx = 0
       setUser({ displayName: loginData.nombres, email: data.email || '', photoURL: data.photoURL || '', phoneNumber: data.movil || '' })
       updateUserFull({ ...data })
+      sessionStartTime = Date.now()
+      identifyStudent(loginData.estudiante, { nombre: loginData.nombres, nivel: data.nivel, email: data.email })
+      trackPageView('login_success', { student_id: loginData.estudiante, period: loginData.periodo })
       block = 'periodos'
       showPeriodTabs = loginData.periodo || 'UNO'
       await loadNotas(showPeriodTabs)
@@ -221,16 +231,25 @@
         iconColor: '#10b981',
       })
     } else if (detail.text === 'Aceptar' && !detail.result) {
+      trackEvent('login_failed')
       Swal.fire({ title: 'Acceso Denegado', icon: 'error', background: '#1e293b', color: '#f8fafc', iconColor: '#ef4444' })
     } else if (detail.text === 'Registrarse') {
       block = 'register'
+      trackPageView('register')
     }
   }
 
   async function handleTabChange(p: string) {
     showPeriodTabs = p
+    trackPageView('tab_changed', { tab: p })
     if (p === 'Concentrador') {
-      notas = await gradesApi.getNotas('UNO', estudiante)
+      const periodos = ['UNO', 'DOS', 'TRES', 'CUATRO']
+      const todas: any[] = []
+      for (const per of periodos) {
+        const n = await gradesApi.getNotas(per, estudiante)
+        if (n.length > 0) todas.push(...n)
+      }
+      notas = todas
     } else if (p === 'Estadisticas') {
       // Cargar notas de todos los periodos para estadísticas completas
       const periodos = ['UNO', 'DOS', 'TRES', 'CUATRO', 'FINAL']
@@ -251,6 +270,7 @@
   async function switchStudent(idx: number) {
     if (idx === currentStudentIdx || idx < 0 || idx >= linkedStudents.length) return
     const s = linkedStudents[idx]
+    trackEvent('student_switched', { from: currentStudentIdx, to: idx, student_id: s.estudiante })
     currentStudentIdx = idx
     estudiante = s.estudiante
     nombres = s.nombres
@@ -263,8 +283,11 @@
   }
 
   function handleLogout() {
+    trackLogout(Math.floor((Date.now() - sessionStartTime) / 1000))
+    resetAnalytics()
     clearSession()
     block = ''
+    trackPageView('login')
     notas = []
     convivencia = []
     estudiante = ''
@@ -275,6 +298,7 @@
 
   function handleRegisterClose() {
     block = ''
+    trackPageView('login')
   }
 </script>
 
@@ -382,7 +406,7 @@
           </form>
 
           <div class="mt-6 text-center animate-in fade-in duration-500 delay-1000">
-            <button class="text-xs text-slate-500 hover:text-indigo-400 transition-colors" onclick={() => block = 'register'}>
+            <button class="text-xs text-slate-500 hover:text-indigo-400 transition-colors" onclick={() => { block = 'register'; trackPageView('register') }}>
               No tienes cuenta? <span class="font-semibold text-indigo-400">Registrate</span>
             </button>
           </div>

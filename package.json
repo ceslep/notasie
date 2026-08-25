@@ -22,6 +22,7 @@
     "@types/three": "^0.185.4",
     "chart.js": "^4.5.1",
     "html2canvas": "^1.4.1",
+    "posthog-js": "^1.418.13",
     "sweetalert2": "^11.26.25",
     "tailwind-animations": "^1.0.2",
     "tailwindcss": "^4.0.0",

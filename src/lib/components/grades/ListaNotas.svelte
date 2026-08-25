@@ -1,6 +1,7 @@
 ﻿<script lang="ts">
   import type { Nota } from '$lib/types'
   import { gradesApi } from '$lib/services/api'
+  import { trackFavoriteToggle } from '$lib/analytics'
   import ModalNotas from '../modals/ModalNotas.svelte'
   import ModalInas from '../modals/ModalInas.svelte'
   import ModalExcusas from '../modals/ModalExcusas.svelte'
@@ -30,11 +31,13 @@
 
   function toggleFav(asignatura: string) {
     const idx = favorites.indexOf(asignatura)
-    if (idx >= 0) {
+    const isFav = idx >= 0
+    if (isFav) {
       favorites = favorites.filter(f => f !== asignatura)
     } else {
       favorites = [...favorites, asignatura]
     }
+    trackFavoriteToggle(asignatura, !isFav)
     try { localStorage.setItem(`${STORAGE_KEY}_${estudiante}`, JSON.stringify(favorites)) } catch {}
   }
 

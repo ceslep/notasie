@@ -1,5 +1,6 @@
 ﻿<script lang="ts">
   import { authApi } from '$lib/services/api'
+  import { trackEvent } from '$lib/analytics'
   import Swal from 'sweetalert2'
   import ListaRegistrados from '../auth/ListaRegistrados.svelte'
 
@@ -34,10 +35,12 @@
           dataRegistro: dr.filter((d: any) => d.year == y),
           dataRegistroT: drT.filter((d: any) => d.year == y) })
       } else {
+        trackEvent('login_failed')
         ingresando = false
         await Swal.fire({ title: 'Acceso Denegado', text: 'Credenciales incorrectas', icon: 'error', background: '#1e293b', color: '#f8fafc', iconColor: '#ef4444', confirmButtonColor: '#6366f1' })
       }
     } catch {
+      trackEvent('login_error')
       ingresando = false
       await Swal.fire({ title: 'Error de conexion', text: 'Intenta de nuevo', icon: 'error', background: '#1e293b', color: '#f8fafc', iconColor: '#ef4444', confirmButtonColor: '#6366f1' })
     }
@@ -125,12 +128,12 @@
             </div>
           </div>
           <div class="space-y-2">
-            <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-widest">Contrasena</label>
+            <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-widest" for="login-pass">Contrasena</label>
             <div class="relative">
               <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
               </div>
-              <input type="password" placeholder="Tu contrasena" class="w-full rounded-2xl border border-white/10 bg-white/5 pl-10 pr-4 py-3.5 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:bg-white/8 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all duration-300" required bind:value={user.pass} />
+              <input id="login-pass" type="password" placeholder="Tu contrasena" class="w-full rounded-2xl border border-white/10 bg-white/5 pl-10 pr-4 py-3.5 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:bg-white/8 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all duration-300" required bind:value={user.pass} />
             </div>
           </div>
           <div class="flex flex-col gap-2.5 pt-3">

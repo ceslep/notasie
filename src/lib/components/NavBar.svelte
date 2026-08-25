@@ -61,7 +61,7 @@
 </nav>
 
 {#if showSwitcher}
-  <div class="fixed inset-0 z-40" onclick={handleClickOutside}></div>
+  <div class="fixed inset-0 z-40" role="button" tabindex="-1" onclick={handleClickOutside} onkeydown={(e) => e.key === 'Escape' && (showSwitcher = false)}></div>
   <div class="fixed top-14 right-4 sm:right-auto sm:translate-x-0 z-50 w-64 max-h-60 overflow-y-auto rounded-xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-2xl shadow-black/40 p-1.5">
     {#each linkedStudents as student, idx}
       <button

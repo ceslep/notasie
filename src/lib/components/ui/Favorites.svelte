@@ -38,7 +38,7 @@
 </script>
 
 <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick={() => onClose?.()}></div>
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" role="button" tabindex="-1" onclick={() => onClose?.()} onkeydown={(e) => e.key === 'Escape' && onClose?.()}></div>
   <div class="relative glass-strong w-full max-w-md rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in duration-300">
     <div class="bg-gradient-to-r from-amber-500/20 to-orange-500/20 px-5 py-3 rounded-t-3xl flex items-center justify-between">
       <div class="flex items-center gap-2">
