@@ -1,6 +1,7 @@
 <script lang="ts">
   import Convivencia from '../ui/Convivencia.svelte'
   import ListaNotas from './ListaNotas.svelte'
+  import ListaNotasFinal from './ListaNotasFinal.svelte'
   import ListaNotasConcentrador from './ListaNotasConcentrador.svelte'
   import ListaConvivencia from './ListaConvivencia.svelte'
   import Estadisticas from './Estadisticas.svelte'
@@ -130,7 +131,7 @@
     {:else if showPeriodTabs === 'Concentrador'}
       {#if notasLoaded}
         {#if notas.length > 0}
-          <ListaNotasConcentrador notas={notas.map(n => ({ asignatura: n.asignatura, periodo: n.periodo, valoracion: n.valoracion, desempeno: n.desempeno }))} />
+          <ListaNotasConcentrador notas={notas.map(n => ({ asignatura: n.asignatura, periodo: n.periodo, valoracion: n.valoracion, desempeno: n.desempeno }))} {nivel} />
         {:else}
           <div class="glass rounded-2xl p-8 text-center border border-white/5">
             <img src="https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-QhvfavmoGfPmREwwvl4XtqTIORARDz.png" alt="" class="w-12 h-12 object-contain mx-auto mb-3 opacity-40" />
@@ -143,7 +144,11 @@
     {:else}
       {#if notasLoaded}
         {#if notas.length > 0}
-          <ListaNotas {notas} {notasDetalladas} {estudiante} {asignacion} {nombres} periodo={showPeriodTabs} {nivel} {HED} {numero} />
+          {#if showPeriodTabs === 'FINAL'}
+            <ListaNotasFinal {notas} {notasDetalladas} {estudiante} {asignacion} {nombres} periodo={showPeriodTabs} {nivel} {HED} {numero} />
+          {:else}
+            <ListaNotas {notas} {notasDetalladas} {estudiante} {asignacion} {nombres} periodo={showPeriodTabs} {nivel} {HED} {numero} />
+          {/if}
         {:else}
           <div class="glass rounded-2xl p-8 text-center border border-white/5">
             <img src="https://lftz25oez4aqbxpq.public.blob.vercel-storage.com/image-QhvfavmoGfPmREwwvl4XtqTIORARDz.png" alt="" class="w-12 h-12 object-contain mx-auto mb-3 opacity-40" />

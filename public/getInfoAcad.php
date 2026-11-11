@@ -49,7 +49,28 @@ try {
     $asignatura = $input['asignatura'] ?? '';
     $periodo = $input['periodo'] ?? '';
     $HED = $input['HED'] ?? '';
-    $year = Date('Y');
+    $year = isset($input['year']) ? (int) $input['year'] : (int) date('Y');
+
+    if (!empty($input['areas'])) {
+        if ($nivel <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Campo requerido: nivel']);
+            exit;
+        }
+
+        $db = getDb($dbConfig);
+        $stmtAreas = $db->prepare(
+            'SELECT area, asignatura, porcentaje, abreviatura, orden
+             FROM porcentajes_area_colegio
+             WHERE nivel = :nivel
+               AND year = :year
+             ORDER BY orden, area, asignatura'
+        );
+        $stmtAreas->execute([':nivel' => $nivel, ':year' => $year]);
+
+        echo json_encode(['areas' => $stmtAreas->fetchAll()], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
 
     if ($asignacion === '' || $nivel <= 0) {
         http_response_code(400);
@@ -85,7 +106,7 @@ try {
     $desc = $stmtDesc->fetch();
 
     $stmtPct = $db->prepare(
-        'SELECT porcentaje 
+        'SELECT area, porcentaje
          FROM porcentajes_area_colegio 
          WHERE nivel = :nivel 
            AND asignatura = :asignatura 
@@ -97,8 +118,9 @@ try {
 
     $resultado = [
         'desempeno'  => $desempeno,
-        'descripcion' => $desc['descripcion'],
-        
+        'descripcion' => $desc['descripcion'] ?? '',
+        'area'        => is_array($pct) ? ($pct['area'] ?? '') : '',
+        'porcentaje'  => is_array($pct) && isset($pct['porcentaje']) ? (float) $pct['porcentaje'] : 0.0,
     ];
 
     echo json_encode($resultado);

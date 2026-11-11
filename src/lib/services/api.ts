@@ -1,4 +1,4 @@
-import type { Excusa, Inasistencia, InasistenciasRespuesta, ExcusasRespuesta, LoginResult, StudentData } from '$lib/types'
+import type { AreaAsignatura, Excusa, Inasistencia, InasistenciasRespuesta, ExcusasRespuesta, LoginResult, StudentData } from '$lib/types'
 
 // En produccion el API vive en el mismo dominio de la app. En desarrollo puede
 // apuntarse al backend local con VITE_API_BASE_URL (vacio por defecto, o con
@@ -52,7 +52,9 @@ export const gradesApi = {
   getPromedioGeneral: (estudiante: string, periodo: string, asignacion: string) =>
     apiPost<any[]>('/est/php/GetPromedioGeneral.php', { estudiante, periodo, asignacion }),
   getInfoAcad: (asignacion: string, nivel: number, valoract: number, asignatura: string, periodo: string, HED: string, grado: string) =>
-    apiPost<{ desempeno: string; descripcion: string }>('/est/php/getInfoAcad.php', { asignacion, nivel, valoract, asignatura, periodo, HED, grado }),
+    apiPost<{ desempeno: string; descripcion: string; area?: string; porcentaje?: number }>('/est/php/getInfoAcad.php', { asignacion, nivel, valoract, asignatura, periodo, HED, grado }),
+  getAreasNivel: (nivel: number) =>
+    apiPost<{ areas: AreaAsignatura[] }>('/est/php/getInfoAcad.php', { areas: true, nivel }),
 }
 
 export const puestosApi = {

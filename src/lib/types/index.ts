@@ -81,6 +81,14 @@ export interface ExcusasRespuesta {
   excusas: Excusa[]
 }
 
+export interface AreaAsignatura {
+  area: string
+  asignatura: string
+  porcentaje: number
+  abreviatura: string
+  orden?: number | null
+}
+
 export interface Puesto {
   nombres: string
   promedio: string

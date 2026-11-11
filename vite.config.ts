@@ -68,6 +68,11 @@ export default defineConfig({
           })
         },
       },
+      '/est/php/getInfoAcad.php': {
+        target: PHP_TARGET,
+        changeOrigin: true,
+        rewrite: (ruta) => (REESCRIBIR ? ruta.replace(/^\/est\/php/, '') : ruta),
+      },
       // Por si la app se abre fuera de /est/ y el endpoint se resuelve relativo.
       '/est/api.php': {
         target: PHP_TARGET,
