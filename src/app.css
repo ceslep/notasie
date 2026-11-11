@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "tailwind-animations";
 
+/* El tema se controla con la clase `dark` en <html>; sin ella rige el modo claro. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-primary: #6366f1;
   --color-primary-light: #818cf8;
@@ -18,6 +21,135 @@
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+/* ==========================================================================
+   TOKENS DE TEMA
+   Modo claro = valores por defecto. Modo oscuro = html.dark
+   ========================================================================== */
+:root {
+  color-scheme: light;
+
+  --app-page-bg: #eef2f7;
+  --app-page-gradient: linear-gradient(135deg, #f8fafc 0%, #eef2ff 45%, #eef2f7 100%);
+  --app-text: #0f172a;
+  --app-text-secondary: #475569;
+
+  --app-glass-bg: rgba(255, 255, 255, 0.72);
+  --app-glass-border: rgba(15, 23, 42, 0.08);
+  --app-glass-strong-bg: rgba(255, 255, 255, 0.88);
+  --app-glass-strong-border: rgba(15, 23, 42, 0.1);
+
+  --app-card-shadow: 0 4px 30px rgba(15, 23, 42, 0.08), 0 0 20px rgba(99, 102, 241, 0.08);
+  --app-scroll-thumb: rgba(99, 102, 241, 0.35);
+  --app-scroll-thumb-hover: rgba(99, 102, 241, 0.55);
+  --app-autofill-bg: rgba(241, 245, 249, 0.98);
+  --app-autofill-text: #0f172a;
+  --app-aurora:
+    radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 20%, rgba(168, 85, 247, 0.08) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 80%, rgba(236, 72, 153, 0.06) 0%, transparent 55%);
+  --app-gradient-text: linear-gradient(135deg, #4f46e5, #7c3aed, #db2777, #4f46e5);
+  --app-loader-title-gradient: linear-gradient(135deg, #1e293b, #4f46e5);
+  --app-canvas-opacity: 0.35;
+}
+
+html.dark {
+  color-scheme: dark;
+
+  --app-page-bg: #0f172a;
+  --app-page-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #0f172a 100%);
+  --app-text: #f8fafc;
+  --app-text-secondary: #94a3b8;
+
+  --app-glass-bg: rgba(30, 27, 75, 0.75);
+  --app-glass-border: rgba(255, 255, 255, 0.12);
+  --app-glass-strong-bg: rgba(15, 23, 42, 0.88);
+  --app-glass-strong-border: rgba(255, 255, 255, 0.15);
+
+  --app-card-shadow: 0 4px 30px rgba(0, 0, 0, 0.3), 0 0 20px rgba(99, 102, 241, 0.1);
+  --app-scroll-thumb: rgba(99, 102, 241, 0.3);
+  --app-scroll-thumb-hover: rgba(99, 102, 241, 0.5);
+  --app-autofill-bg: rgba(30, 41, 59, 0.95);
+  --app-autofill-text: #f8fafc;
+  --app-aurora:
+    radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(168, 85, 247, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
+  --app-gradient-text: linear-gradient(135deg, #818cf8, #c084fc, #f472b6, #818cf8);
+  --app-loader-title-gradient: linear-gradient(135deg, #f8fafc, #a5b4fc);
+  --app-canvas-opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   INVERSIÓN DE LA ESCALA NEUTRA (modo claro)
+   El diseño original usa utilidades pensadas para fondo oscuro
+   (text-white, text-slate-400, bg-white/5, border-white/10, ...).
+   En modo claro se reasignan a tinta oscura sobre superficies claras, de modo
+   que la tipografía siempre quede oscura sobre fondo claro y legible.
+   -------------------------------------------------------------------------- */
+html:not(.dark) {
+  --color-white: #0f172a;
+
+  --color-slate-50: #0f172a;
+  --color-slate-100: #0f172a;
+  --color-slate-200: #0f172a;
+  --color-slate-300: #1e293b;
+  --color-slate-400: #334155;
+  --color-slate-500: #5b6b80;
+  --color-slate-600: #475569;
+  --color-slate-700: #cbd5e1;
+  --color-slate-800: #e2e8f0;
+  --color-slate-900: #f1f5f9;
+  --color-slate-950: #f8fafc;
+
+  /* Acentos: los tonos 300/400 son demasiado claros sobre blanco,
+     se sustituyen por tonos 600/700 con contraste suficiente. */
+  --color-indigo-200: #4338ca;
+  --color-indigo-300: #3730a3;
+  --color-indigo-400: #4338ca;
+  --color-purple-200: #6b21a8;
+  --color-purple-300: #6b21a8;
+  --color-purple-400: #7e22ce;
+  --color-violet-200: #5b21b6;
+  --color-violet-300: #5b21b6;
+  --color-violet-400: #6d28d9;
+  --color-blue-200: #1d4ed8;
+  --color-blue-300: #1d4ed8;
+  --color-blue-400: #1d4ed8;
+  --color-cyan-200: #0e7490;
+  --color-cyan-300: #0e7490;
+  --color-cyan-400: #0e7490;
+  --color-sky-200: #0369a1;
+  --color-sky-300: #0369a1;
+  --color-sky-400: #0369a1;
+  --color-teal-200: #0f766e;
+  --color-teal-300: #0f766e;
+  --color-teal-400: #0f766e;
+  --color-emerald-200: #34d399;
+  --color-emerald-300: #047857;
+  --color-emerald-400: #047857;
+  --color-green-200: #16a34a;
+  --color-green-300: #15803d;
+  --color-green-400: #15803d;
+  --color-amber-200: #fbbf24;
+  --color-amber-300: #b45309;
+  --color-amber-400: #b45309;
+  --color-yellow-200: #ca8a04;
+  --color-yellow-300: #a16207;
+  --color-yellow-400: #a16207;
+  --color-orange-200: #c2410c;
+  --color-orange-300: #c2410c;
+  --color-orange-400: #c2410c;
+  --color-red-200: #b91c1c;
+  --color-red-300: #b91c1c;
+  --color-red-400: #b91c1c;
+  --color-rose-200: #be123c;
+  --color-rose-300: #be123c;
+  --color-rose-400: #be123c;
+  --color-pink-200: #be185d;
+  --color-pink-300: #be185d;
+  --color-pink-400: #be185d;
+}
+
 @layer base {
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -27,10 +159,12 @@
   }
 
   body {
-    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #0f172a 100%);
+    background: var(--app-page-gradient);
+    background-attachment: fixed;
     min-height: 100vh;
-    color: var(--color-text);
+    color: var(--app-text);
     overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   body::before {
@@ -40,9 +174,7 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 20%, rgba(168,85,247,0.06) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 80%, rgba(236,72,153,0.05) 0%, transparent 50%);
+    background: var(--app-aurora);
     animation: bgFloat 20s ease-in-out infinite;
     z-index: -1;
     pointer-events: none;
@@ -50,8 +182,8 @@
 
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.5); }
+  ::-webkit-scrollbar-thumb { background: var(--app-scroll-thumb); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--app-scroll-thumb-hover); }
 }
 
 @keyframes bgFloat {
@@ -87,22 +219,25 @@
 .animate-pulse-glow { animation: pulseGlow 2s ease-in-out infinite; }
 .animate-morph { animation: morphGlow 8s ease-in-out infinite; }
 
+/* Superficies de cristal adaptadas al tema activo */
 .glass {
-  background: rgba(30, 27, 75, 0.75);
+  background: var(--app-glass-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--app-glass-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .glass-strong {
-  background: rgba(15, 23, 42, 0.88);
+  background: var(--app-glass-strong-bg);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--app-glass-strong-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6, #818cf8);
+  background: var(--app-gradient-text);
   background-size: 300% 300%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -115,7 +250,7 @@
 }
 
 .glow-card {
-  box-shadow: 0 4px 30px rgba(0,0,0,0.3), 0 0 20px rgba(99,102,241,0.1);
+  box-shadow: var(--app-card-shadow);
 }
 
 .gradient-border {
@@ -138,11 +273,35 @@
   pointer-events: none;
 }
 
+/* Pantallas completas con el fondo del tema */
+.app-page-bg {
+  background: var(--app-page-gradient);
+  transition: background 0.3s ease;
+}
+
+.app-loader-title {
+  background: var(--app-loader-title-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* El fondo 3D se atenúa en modo claro para no competir con la tipografía */
+.three-bg {
+  opacity: var(--app-canvas-opacity);
+  transition: opacity 0.3s ease;
+}
+
+/* Texto que siempre va sobre un velo oscuro (scrim), sin importar el tema */
+.on-dark-scrim {
+  color: #f8fafc;
+}
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  -webkit-text-fill-color: #f8fafc;
-  -webkit-box-shadow: 0 0 0px 1000px rgba(30, 41, 59, 0.95) inset;
+  -webkit-text-fill-color: var(--app-autofill-text);
+  -webkit-box-shadow: 0 0 0px 1000px var(--app-autofill-bg) inset;
   transition: background-color 5000s ease-in-out 0s;
 }
 

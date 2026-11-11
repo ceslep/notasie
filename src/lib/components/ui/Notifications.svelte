@@ -153,10 +153,10 @@
 
   .bell-button {
     position: relative;
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--app-glass-strong-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--app-glass-strong-border);
     border-radius: 50%;
     width: 48px;
     height: 48px;
@@ -164,12 +164,12 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: #e2e8f0;
+    color: var(--app-text);
     transition: all 0.2s ease;
   }
 
   .bell-button:hover {
-    background: rgba(255, 255, 255, 0.25);
+    background: color-mix(in oklab, var(--app-text) 12%, var(--app-glass-strong-bg));
     transform: scale(1.05);
   }
 
@@ -188,7 +188,7 @@
     align-items: center;
     justify-content: center;
     padding: 0 4px;
-    border: 2px solid rgba(15, 23, 42, 0.8);
+    border: 2px solid var(--app-page-bg);
   }
 
   .toast-container {
@@ -204,10 +204,10 @@
 
   .toast-card {
     position: relative;
-    background: rgba(15, 23, 42, 0.85);
+    background: var(--app-glass-strong-bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--app-glass-strong-border);
     border-radius: 12px;
     padding: 12px 36px 12px 44px;
     display: flex;
@@ -242,7 +242,7 @@
 
   .toast-message {
     font-size: 0.82rem;
-    color: #e2e8f0;
+    color: var(--app-text);
     line-height: 1.4;
     flex: 1;
   }
@@ -253,7 +253,7 @@
     right: 8px;
     background: none;
     border: none;
-    color: #94a3b8;
+    color: var(--app-text-secondary);
     cursor: pointer;
     font-size: 0.8rem;
     padding: 2px 4px;
@@ -263,7 +263,7 @@
   }
 
   .toast-close:hover {
-    color: #e2e8f0;
+    color: var(--app-text);
   }
 
   .toast-progress {
@@ -272,13 +272,13 @@
     left: 0;
     width: 100%;
     height: 2px;
-    background: rgba(255, 255, 255, 0.1);
+    background: color-mix(in oklab, var(--app-text) 12%, transparent);
   }
 
   .toast-progress-bar {
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.4);
+    background: color-mix(in oklab, var(--app-text) 40%, transparent);
     transform-origin: left;
     animation: shrink linear forwards;
   }
@@ -294,10 +294,10 @@
     z-index: 1001;
     width: 340px;
     max-height: 400px;
-    background: rgba(15, 23, 42, 0.9);
+    background: var(--app-glass-strong-bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--app-glass-strong-border);
     border-radius: 12px;
     display: flex;
     flex-direction: column;
@@ -310,19 +310,19 @@
     justify-content: space-between;
     align-items: center;
     padding: 14px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid color-mix(in oklab, var(--app-text) 10%, transparent);
   }
 
   .panel-title {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--app-text);
   }
 
   .close-panel {
     background: none;
     border: none;
-    color: #94a3b8;
+    color: var(--app-text-secondary);
     cursor: pointer;
     font-size: 0.9rem;
     padding: 2px 6px;
@@ -331,7 +331,7 @@
   }
 
   .close-panel:hover {
-    color: #e2e8f0;
+    color: var(--app-text);
   }
 
   .panel-body {

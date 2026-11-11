@@ -32,8 +32,14 @@ export interface NotaDetallada {
 export interface Inasistencia {
   fecha: string
   hora_clase: string
+  /** Texto de la excusa que ya arma el servidor ('No' cuando no encontro ninguna). */
   excusa: string
   horas: string
+  /** Campos extra que devuelve GetInasistencias.php y sirven para cruzar la excusa. */
+  materia?: string
+  detalle?: string
+  periodo?: string
+  year?: string
 }
 
 export interface Excusa {
@@ -41,6 +47,38 @@ export interface Excusa {
   motivo: string
   motivo_permiso: string
   periodo: string
+  /**
+   * Hora de clase que cubre la excusa. 'Permiso por todo el dia' y
+   * 'Permiso por varios dias' cubren todas las clases de esa fecha;
+   * 'NO APLICA' o vacio significa que la excusa no identifica una hora puntual.
+   */
+  hora_salida?: string
+  /** Duracion del permiso (columna TIME de la tabla excusas). */
+  horas?: string
+  /** Motivo escrito a mano en el formulario del colegio. */
+  causa?: string
+  /** Texto ya resuelto que devuelve backend/GetExcusas.php (motivo + permiso). */
+  texto?: string
+  acudiente?: string
+  telefono_acudiente?: string
+  fechahora?: string
+  ind?: string | number
+  year?: string | number
+  /** La tabla de excusas no guarda materia; se acepta por si otro despliegue la trae. */
+  asignatura?: string
+  materia?: string
+}
+
+/** Respuesta de GetInasistencias.php. */
+export interface InasistenciasRespuesta {
+  total: number
+  inasistencias: Inasistencia[]
+}
+
+/** Respuesta de GetExcusas.php. */
+export interface ExcusasRespuesta {
+  total: number
+  excusas: Excusa[]
 }
 
 export interface Puesto {

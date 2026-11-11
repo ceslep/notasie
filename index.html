@@ -7,7 +7,19 @@
   <meta name="keywords" content="software académico,anserma caldas,colombia">
   <meta name="author" content="Ing. César Patiño">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <meta name="theme-color" content="#00FA9A">
+  <meta name="theme-color" content="#f8fafc">
+  <meta name="color-scheme" content="light dark">
+
+  <script>
+    // Aplica el tema guardado antes del primer pintado (modo claro por defecto).
+    (function () {
+      var t = 'light';
+      try { t = localStorage.getItem('notasie_theme') === 'dark' ? 'dark' : 'light'; } catch (e) {}
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      document.documentElement.dataset.theme = t;
+      document.documentElement.style.colorScheme = t;
+    })();
+  </script>
   
 
   <link rel="manifest" href="manifest.webmanifest">
@@ -19,11 +31,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <title>I.E de Occidente</title>
   <style>
-    body { margin: 0; background: #0f172a; }
+    :root {
+      --page-bg: #eef2f7;
+      --loader-bg: linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #eef2f7 100%);
+      --loader-title: linear-gradient(135deg, #1e293b, #4f46e5);
+    }
+    html.dark {
+      --page-bg: #0f172a;
+      --loader-bg: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      --loader-title: linear-gradient(135deg, #f8fafc, #a5b4fc);
+    }
+    body { margin: 0; background: var(--page-bg); }
     .app-loader {
       position: fixed; inset: 0; z-index: 9999;
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;
-      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      background: var(--loader-bg);
+      transition: opacity 0.4s;
     }
     .app-loader .glow-orb {
       position: absolute; border-radius: 50%; filter: blur(80px); animation: orbPulse 4s ease-in-out infinite;
@@ -43,7 +66,7 @@
     .app-loader h1 {
       margin: 0; font-family: 'Inter', system-ui, sans-serif; font-size: 22px; font-weight: 800;
       letter-spacing: -0.02em; position: relative; z-index: 1;
-      background: linear-gradient(135deg, #f8fafc, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background: var(--loader-title); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       animation: textFadeIn 0.8s 0.2s ease-out both;
     }
     .app-loader p {
@@ -51,6 +74,12 @@
       letter-spacing: 0.2em; text-transform: uppercase; position: relative; z-index: 1;
       animation: textFadeIn 0.8s 0.35s ease-out both;
     }
+    .app-loader .loader-aviso {
+      max-width: 320px; text-align: center; text-transform: none; letter-spacing: 0;
+      font-size: 12px; line-height: 1.5; color: #b91c1c; background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 10px 14px;
+    }
+    html.dark .app-loader .loader-aviso { color: #fca5a5; }
     .app-loader .dots { display: flex; gap: 6px; position: relative; z-index: 1; animation: textFadeIn 0.8s 0.5s ease-out both; }
     .app-loader .dot {
       width: 8px; height: 8px; border-radius: 50%; animation: dotBounce 1.2s ease-in-out infinite;
@@ -68,13 +97,51 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js');
     }
-    const onreadystatechange = () => {
-      if (document.readyState === "complete") {
-        const loader = document.getElementById("app-loader");
-        if (loader) { loader.style.opacity = "0"; loader.style.transition = "opacity 0.4s"; setTimeout(() => loader.remove(), 400); }
+
+    // El loader de arranque debe desaparecer SIEMPRE. Dos motivos por los que
+    // antes podia quedarse pegado:
+    //   1. Si la pagina ya estaba en "complete" antes de registrar el evento,
+    //      onreadystatechange no se volvia a disparar nunca.
+    //   2. Si el modulo de la app fallaba, tampoco se limpiaba.
+    (function () {
+      var quitar = function () {
+        var loader = document.getElementById('app-loader');
+        if (!loader) return;
+        loader.style.opacity = '0';
+        loader.style.transition = 'opacity 0.4s';
+        setTimeout(function () { loader.remove(); }, 400);
+      };
+
+      // Caso 1: la pagina ya termino (o termina ahora).
+      if (document.readyState === 'complete') {
+        quitar();
+      } else {
+        document.addEventListener('readystatechange', function () {
+          if (document.readyState === 'complete') quitar();
+        });
+        window.addEventListener('load', quitar);
       }
-    }
-    document.onreadystatechange = onreadystatechange;
+
+      // Caso 2: red de seguridad. Si a los 8 segundos la app no ha montado,
+      // se retira el loader y se avisa en vez de dejar la animacion para siempre.
+      setTimeout(function () {
+        var app = document.getElementById('app');
+        if (app && app.children.length === 0) {
+          var loader = document.getElementById('app-loader');
+          if (loader) {
+            var aviso = loader.querySelector('.loader-aviso');
+            if (!aviso) {
+              aviso = document.createElement('p');
+              aviso.className = 'loader-aviso';
+              aviso.textContent = 'No se pudo iniciar la aplicacion. Abre la consola del navegador (F12) para ver el error.';
+              loader.appendChild(aviso);
+            }
+          }
+          return; // se deja el loader con el aviso, es informacion util
+        }
+        quitar();
+      }, 8000);
+    })();
   </script>
 </head>
 

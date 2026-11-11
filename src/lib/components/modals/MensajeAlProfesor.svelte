@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
   import { reclamoApi, getIP } from '$lib/services/api'
   import Swal from 'sweetalert2'
 
@@ -42,7 +42,7 @@
   </div>
   <div class="p-5 space-y-3">
     <label class="text-xs font-semibold text-slate-600" for="msg-text">Mensaje</label>
-    <textarea id="msg-text" rows="4" bind:value={mensaje} class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all resize-none"></textarea>
+    <textarea id="msg-text" rows="4" bind:value={mensaje} class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all resize-none"></textarea>
     <div class="space-y-1">
       <label class="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
         <input type="checkbox" bind:checked={masclaV} class="rounded text-emerald-500" /> El nombre del docente es correcto?

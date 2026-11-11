@@ -2,6 +2,7 @@
   import { onMount } from 'svelte'
   import { Chart, registerables } from 'chart.js'
   import { trackStatisticsView } from '$lib/analytics'
+  import { theme } from '$lib/theme.svelte'
 
   let { notas = [], convivencia = [], estudiante = '', nivel = '' }: {
     notas?: any[]; convivencia?: any[]; estudiante?: string; nivel?: string
@@ -68,10 +69,29 @@
     if (radarChart) { radarChart.destroy(); radarChart = null }
   }
 
+  /** Colores de las gráficas según el tema activo (tipografía legible en ambos). */
+  function palette() {
+    const dark = theme.current === 'dark'
+    return {
+      tick: dark ? 'rgba(148, 163, 184, 0.7)' : 'rgba(51, 65, 85, 0.9)',
+      grid: dark ? 'rgba(255,255,255,0.04)' : 'rgba(15, 23, 42, 0.08)',
+      gridSoft: dark ? 'rgba(255,255,255,0.06)' : 'rgba(15, 23, 42, 0.1)',
+      legend: dark ? 'rgba(203, 213, 225, 0.8)' : 'rgba(30, 41, 59, 0.9)',
+      pointLabel: dark ? 'rgba(203, 213, 225, 0.7)' : 'rgba(30, 41, 59, 0.85)',
+      tooltipBg: dark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.97)',
+      tooltipTitle: dark ? '#f8fafc' : '#0f172a',
+      tooltipBody: dark ? '#cbd5e1' : '#334155',
+      tooltipBorder: 'rgba(99, 102, 241, 0.35)',
+      sliceBorder: dark ? 'rgba(15, 23, 42, 0.8)' : 'rgba(255, 255, 255, 0.9)',
+    }
+  }
+
   function buildCharts() {
     if (!barCanvas || !notas || notas.length === 0) return
 
     destroyCharts()
+
+    const p = palette()
 
     const labels = notas.map(n => n.asignatura?.length > 12 ? n.asignatura.slice(0, 12) + '…' : n.asignatura)
     const data = notas.map(n => parseFloat(n.valoracion || '0'))
@@ -108,10 +128,10 @@
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-            titleColor: '#f8fafc',
-            bodyColor: '#cbd5e1',
-            borderColor: 'rgba(99, 102, 241, 0.3)',
+            backgroundColor: p.tooltipBg,
+            titleColor: p.tooltipTitle,
+            bodyColor: p.tooltipBody,
+            borderColor: p.tooltipBorder,
             borderWidth: 1,
             cornerRadius: 12,
             padding: 10,
@@ -121,11 +141,11 @@
           y: {
             beginAtZero: true,
             max: 5,
-            ticks: { color: 'rgba(148, 163, 184, 0.7)', stepSize: 1, font: { size: 10 } },
-            grid: { color: 'rgba(255,255,255,0.04)' },
+            ticks: { color: p.tick, stepSize: 1, font: { size: 10 } },
+            grid: { color: p.grid },
           },
           x: {
-            ticks: { color: 'rgba(148, 163, 184, 0.7)', font: { size: 9 }, maxRotation: 45 },
+            ticks: { color: p.tick, font: { size: 9 }, maxRotation: 45 },
             grid: { display: false },
           },
         },
@@ -151,7 +171,7 @@
               'rgba(251, 191, 36, 0.75)',
               'rgba(251, 113, 133, 0.75)',
             ],
-            borderColor: 'rgba(15, 23, 42, 0.8)',
+            borderColor: p.sliceBorder,
             borderWidth: 3,
             hoverOffset: 8,
           }],
@@ -164,12 +184,12 @@
           plugins: {
             legend: {
               position: 'bottom',
-              labels: { color: 'rgba(203, 213, 225, 0.8)', font: { size: 10 }, padding: 12, usePointStyle: true, pointStyleWidth: 8 },
+              labels: { color: p.legend, font: { size: 10 }, padding: 12, usePointStyle: true, pointStyleWidth: 8 },
             },
             tooltip: {
-              backgroundColor: 'rgba(15, 23, 42, 0.95)',
-              titleColor: '#f8fafc',
-              bodyColor: '#cbd5e1',
+              backgroundColor: p.tooltipBg,
+              titleColor: p.tooltipTitle,
+              bodyColor: p.tooltipBody,
               cornerRadius: 12,
               padding: 10,
             },
@@ -203,9 +223,9 @@
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: 'rgba(15, 23, 42, 0.95)',
-              titleColor: '#f8fafc',
-              bodyColor: '#cbd5e1',
+              backgroundColor: p.tooltipBg,
+              titleColor: p.tooltipTitle,
+              bodyColor: p.tooltipBody,
               cornerRadius: 12,
             },
           },
@@ -214,9 +234,9 @@
               beginAtZero: true,
               max: 5,
               ticks: { display: false, stepSize: 1 },
-              grid: { color: 'rgba(255,255,255,0.06)' },
-              angleLines: { color: 'rgba(255,255,255,0.06)' },
-              pointLabels: { color: 'rgba(203, 213, 225, 0.7)', font: { size: 9 } },
+              grid: { color: p.gridSoft },
+              angleLines: { color: p.gridSoft },
+              pointLabels: { color: p.pointLabel, font: { size: 9 } },
             },
           },
         },
@@ -243,6 +263,15 @@
       lastDataKey = currentKey
       setTimeout(buildCharts, 50)
     }
+  })
+
+  // Redibujar las gráficas al cambiar entre modo claro y oscuro
+  let lastTheme = theme.current
+  $effect(() => {
+    const current = theme.current
+    if (current === lastTheme) return
+    lastTheme = current
+    if (barCanvas) setTimeout(buildCharts, 60)
   })
 
   const nivelLabel: Record<string, string> = {

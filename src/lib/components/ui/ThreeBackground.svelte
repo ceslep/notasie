@@ -117,4 +117,4 @@
   })
 </script>
 
-<canvas bind:this={canvas} class="fixed inset-0 w-full h-full pointer-events-none" style="z-index: 0;"></canvas>
+<canvas bind:this={canvas} class="three-bg fixed inset-0 w-full h-full pointer-events-none" style="z-index: 0;"></canvas>

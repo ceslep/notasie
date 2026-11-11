@@ -1,6 +1,10 @@
-import type { LoginResult, StudentData } from '$lib/types'
+import type { Excusa, Inasistencia, InasistenciasRespuesta, ExcusasRespuesta, LoginResult, StudentData } from '$lib/types'
 
-const BASE_URL = 'https://app.iedeoccidente.com'
+// En produccion el API vive en el mismo dominio de la app. En desarrollo puede
+// apuntarse al backend local con VITE_API_BASE_URL (vacio por defecto, o con
+// cadena vacia se usan rutas relativas resueltas por el proxy de Vite), lo que
+// permite que /est/php/GetExcusas.php lo atienda `npm run dev:php`.
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'https://app.iedeoccidente.com').replace(/\/+$/, '')
 
 async function apiPost<T>(path: string, body: Record<string, unknown>): Promise<T> {
   const response = await fetch(`${BASE_URL}${path}`, {
@@ -38,9 +42,9 @@ export const gradesApi = {
   getNotasDetallado: (estudiante: string, asignatura: string, periodo: string) =>
     apiPost<any[]>('/est/php/GetNotasDetallado.php', { estudiante, asignatura, periodo }),
   getInasistencias: (estudiante: string, asignatura: string, periodo: string) =>
-    apiPost<any[]>('/est/php/GetInasistencias.php', { estudiante, asignatura, periodo }),
+    apiPost<InasistenciasRespuesta | Inasistencia[]>('/est/php/GetInasistencias.php', { estudiante, asignatura, periodo }),
   getExcusas: (estudiante: string, periodo: string) =>
-    apiPost<{ excusas: any[]; total: number }>('/est/php/GetExcusas.php', { estudiante, periodo }),
+    apiPost<ExcusasRespuesta | Excusa[]>('/est/php/GetExcusas.php', { estudiante, periodo }),
   getDescripcion: (estudiante: string, asignatura: string, valoracion: string, periodo: string, docente: string) =>
     apiPost<any[]>('/est/php/GetDescripcion.php', { estudiante, asignatura, valoracion, periodo, docente }),
   getPromedios: (estudiante: string, periodo: string, asignacion: string) =>

@@ -1,0 +1,27 @@
+Los archivos que van a https://app.iedeoccidente.com/est/php/ son:
+
+  api.php
+  GetExcusas.php            (excusas del estudiante; lo consume el modal de inasistencias)
+  social_config.php
+  social/
+  social/.htaccess
+  social/uploads/          (debe quedar con permisos de escritura, 755)
+
+NO subir datosConexion.php: el servidor del colegio ya tiene el suyo con las
+credenciales reales. Sin ese archivo, GetExcusas.php usa DB_HOST, DB_USER,
+DB_PASS y DB_NAME del entorno.
+
+Estructura en el servidor:
+
+  /est/          <- contenido de la carpeta dist\ del repo (el frontend)
+  /est/php/      <- contenido de la carpeta backend\ del repo (este paquete)
+
+El frontend llama a /est/php/api.php automaticamente; no hay que configurar nada.
+
+Para probar GetExcusas.php en local (http://127.0.0.1:8000/GetExcusas.php):
+
+  npm run dev:php     (sirve la carpeta backend\ en el puerto 8000)
+  npm run dev         (Vite reenvia /est/php/GetExcusas.php a ese backend)
+
+ELIMINA este paquete despues de subirlo: no debe quedar en el repositorio.
+

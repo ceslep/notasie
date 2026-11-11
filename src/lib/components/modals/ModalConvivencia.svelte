@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
   import type { ConvivenciaDetalle } from '$lib/types'
 
   let { positivo = false, info, onClose }: {
@@ -129,7 +129,7 @@
               <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
               <p class="text-[10px] text-slate-500 uppercase tracking-wider">Firma Docente</p>
             </div>
-            <img src={info.cv_firma} alt="Firma docente" class="max-h-24 bg-white rounded-lg p-2" />
+            <img src={info.cv_firma} alt="Firma docente" class="max-h-24 bg-[#ffffff] rounded-lg p-2" />
           </div>
         {/if}
 
@@ -139,7 +139,7 @@
               <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
               <p class="text-[10px] text-slate-500 uppercase tracking-wider">Firma Acudiente</p>
             </div>
-            <img src={info.firmaAcudiente} alt="Firma acudiente" class="max-h-24 bg-white rounded-lg p-2" />
+            <img src={info.firmaAcudiente} alt="Firma acudiente" class="max-h-24 bg-[#ffffff] rounded-lg p-2" />
           </div>
         {/if}
 

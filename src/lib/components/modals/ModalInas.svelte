@@ -1,17 +1,38 @@
-﻿<script lang="ts">
+<script lang="ts">
   import TableInasistencias from '../grades/TableInasistencias.svelte'
   import { gradesApi } from '$lib/services/api'
+  import { normalizarRespuestaExcusas, normalizarRespuestaInasistencias } from '$lib/utils/excusas'
+  import type { Excusa, Inasistencia } from '$lib/types'
   import { onMount } from 'svelte'
 
   let { estudiante, asignatura, periodo, total = 0, onClose }: {
     estudiante: string; asignatura: string; periodo: string; total?: number; onClose?: (t?: string) => void
   } = $props()
 
-  let inas = $state<any[]>([])
+  let inas = $state<Inasistencia[]>([])
+  let excusas = $state<Excusa[]>([])
+  // Se recalcula con las horas reales de las filas que devuelve el servidor.
+  let totalHoras = $state(total)
 
   onMount(async () => {
-    inas = await gradesApi.getInasistencias(estudiante, asignatura, periodo)
-    total = inas.filter((i: any) => !isNaN(parseInt(i.horas))).reduce((a: number, b: any) => a + parseInt(b.horas), 0)
+    // Las inasistencias y las excusas se piden juntas: las excusas del
+    // estudiante se cruzan con cada inasistencia (fecha + hora de salida) para
+    // mostrarlas en su fila.
+    const [inasResp, excusasResp] = await Promise.all([
+      gradesApi.getInasistencias(estudiante, asignatura, periodo).catch(() => null),
+      gradesApi.getExcusas(estudiante, periodo).catch(() => null),
+    ])
+
+    // GetInasistencias.php responde { total, inasistencias: [...] }.
+    inas = normalizarRespuestaInasistencias(inasResp)
+    excusas = normalizarRespuestaExcusas(excusasResp)
+
+    const suma = inas.reduce((a, b) => {
+      const horas = parseInt(String(b.horas))
+      return isNaN(horas) ? a : a + horas
+    }, 0)
+    if (inas.length > 0) totalHoras = suma
+
     setTimeout(() => { if (inas.length === 0) onClose?.('no hay inasistencias') }, 1000)
   })
 </script>
@@ -25,7 +46,7 @@
     </div>
     <div class="p-4 max-h-[75vh] overflow-y-auto">
       {#if inas.length > 0}
-        <TableInasistencias {total} inasistenciasDetallado={inas} />
+        <TableInasistencias total={totalHoras} inasistenciasDetallado={inas} {excusas} />
       {:else}
         <div class="flex items-center justify-center min-h-[40vh]"><div class="w-10 h-10 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin"></div></div>
       {/if}
@@ -33,4 +54,3 @@
     <div class="px-5 pb-5"><button class="w-full rounded-2xl px-4 py-3 text-sm font-semibold glass text-slate-300 hover:text-white active:scale-[0.98] transition-transform" onclick={() => onClose?.()}>Cerrar</button></div>
   </div>
 </div>
-

@@ -1,7 +1,8 @@
-﻿<script lang="ts">
+<script lang="ts">
   import { authApi } from '$lib/services/api'
   import { trackEvent } from '$lib/analytics'
   import Swal from 'sweetalert2'
+  import { swalTheme } from '$lib/theme.svelte'
   import ListaRegistrados from '../auth/ListaRegistrados.svelte'
 
   let { open = true, onLogin, onCancel, onRegister }: {
@@ -37,12 +38,12 @@
       } else {
         trackEvent('login_failed')
         ingresando = false
-        await Swal.fire({ title: 'Acceso Denegado', text: 'Credenciales incorrectas', icon: 'error', background: '#1e293b', color: '#f8fafc', iconColor: '#ef4444', confirmButtonColor: '#6366f1' })
+        await Swal.fire({ title: 'Acceso Denegado', text: 'Credenciales incorrectas', icon: 'error', ...swalTheme(), iconColor: '#ef4444', confirmButtonColor: '#6366f1' })
       }
     } catch {
       trackEvent('login_error')
       ingresando = false
-      await Swal.fire({ title: 'Error de conexion', text: 'Intenta de nuevo', icon: 'error', background: '#1e293b', color: '#f8fafc', iconColor: '#ef4444', confirmButtonColor: '#6366f1' })
+      await Swal.fire({ title: 'Error de conexion', text: 'Intenta de nuevo', icon: 'error', ...swalTheme(), iconColor: '#ef4444', confirmButtonColor: '#6366f1' })
     }
   }
 
@@ -50,7 +51,7 @@
     if (user.identificacion !== '') {
       const r = await authApi.detectRegister(user.identificacion)
       if (r.registrado === 'no' && !user.identificacion.includes('00000000000') && !user.identificacion.includes('11111111111') && !listado && !listadoT) {
-        await Swal.fire({ title: 'No registrado', text: 'Por favor registrese', icon: 'info', confirmButtonText: 'Aceptar', background: '#1e293b', color: '#f8fafc', iconColor: '#3b82f6', confirmButtonColor: '#6366f1' })
+        await Swal.fire({ title: 'No registrado', text: 'Por favor registrese', icon: 'info', confirmButtonText: 'Aceptar', ...swalTheme(), iconColor: '#3b82f6', confirmButtonColor: '#6366f1' })
         user.identificacion = ''
       }
     }
@@ -93,7 +94,7 @@
         <div class="w-16 h-16 rounded-full border-4 border-indigo-500/20 border-t-indigo-500 animate-spin"></div>
         <div class="absolute inset-0 w-16 h-16 rounded-full border-4 border-transparent border-b-purple-500 animate-spin" style="animation-duration: 1.5s; animation-direction: reverse;"></div>
       </div>
-      <p class="text-sm text-slate-300 font-medium">Verificando credenciales...</p>
+      <p class="text-sm on-dark-scrim font-medium">Verificando credenciales...</p>
     </div>
   </div>
 {/if}

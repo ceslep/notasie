@@ -12,6 +12,16 @@ dist
 dist-ssr
 *.local
 
+# Imagenes subidas a la red social (contenido de usuarios, no va al repo)
+backend/social/uploads/*
+!backend/social/uploads/.gitkeep
+
+# Credenciales de base de datos locales: cada entorno tiene las suyas.
+# Si no existe, backend/GetExcusas.php usa DB_HOST/DB_USER/DB_PASS/DB_NAME
+# o los valores por defecto de XAMPP (root sin contrasena, base "occidente").
+backend/datosConexion.php
+backend/datos_conexion.php
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
   import { authApi, getIP } from '$lib/services/api'
   import { trackRegister, trackEvent } from '$lib/analytics'
   import Swal from 'sweetalert2'
@@ -117,9 +117,9 @@
     </div>
     <div class="flex flex-col gap-2 pt-2">
       <button type="submit" class="w-full rounded-2xl px-4 py-3 text-sm font-semibold bg-gradient-to-r from-amber-500/20 to-orange-500/20 disabled:opacity-50 active:scale-[0.98] transition-transform" disabled={spn}>
-        Registrarse {#if spn}<span class="inline-block w-4 h-4 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin ml-2"></span>{/if}
+        Registrarse {#if spn}<span class="inline-block w-4 h-4 border-2 border-white/20 border-t-white/70 rounded-full animate-spin ml-2"></span>{/if}
       </button>
-      <button type="button" class="w-full rounded-2xl px-4 py-3 text-sm font-semibold bg-slate-100 text-slate-400 active:scale-[0.98] transition-transform" onclick={() => onClose?.()}>Cancelar</button>
+      <button type="button" class="w-full rounded-2xl px-4 py-3 text-sm font-semibold glass text-slate-300 hover:text-white active:scale-[0.98] transition-transform" onclick={() => onClose?.()}>Cancelar</button>
     </div>
   </form>
 </div></div>

@@ -1,8 +1,9 @@
 <script lang="ts">
   import ModalViewFoto from './modals/ModalViewFoto.svelte'
+  import ThemeToggle from './ui/ThemeToggle.svelte'
 
-  let { photoURL = '', nombres = '', title = '', onLogout, onLogin, onRegister, showActions = true, refreshing = false, onRefresh, linkedStudents = [], currentStudentIdx = 0, onSwitchStudent }: {
-    photoURL?: string; nombres?: string; title?: string; onLogout?: () => void; onLogin?: () => void; onRegister?: () => void; showActions?: boolean; refreshing?: boolean; onRefresh?: () => void; linkedStudents?: { name: string; grade?: string }[]; currentStudentIdx?: number; onSwitchStudent?: (idx: number) => void
+  let { photoURL = '', nombres = '', title = '', onLogout, onLogin, onRegister, showActions = true, refreshing = false, onRefresh, linkedStudents = [], currentStudentIdx = 0, onSwitchStudent, onSocial, socialActivo = false }: {
+    photoURL?: string; nombres?: string; title?: string; onLogout?: () => void; onLogin?: () => void; onRegister?: () => void; showActions?: boolean; refreshing?: boolean; onRefresh?: () => void; linkedStudents?: { name: string; grade?: string }[]; currentStudentIdx?: number; onSwitchStudent?: (idx: number) => void; onSocial?: () => void; socialActivo?: boolean
   } = $props()
 
   let openFoto = $state(false)
@@ -49,6 +50,16 @@
             <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
           </div>
         </button>
+        <button
+          onclick={() => onSocial?.()}
+          class="p-2 rounded-xl transition-all {socialActivo ? 'text-indigo-400 bg-indigo-500/15' : 'text-slate-400 hover:text-indigo-400 hover:bg-white/10'}"
+          title="Red Social del colegio"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+          </svg>
+        </button>
+        <ThemeToggle />
         <button onclick={() => onRefresh?.()} class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-all" title="Actualizar" disabled={refreshing}>
           <svg class="w-4 h-4 {refreshing ? 'animate-spin' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
         </button>

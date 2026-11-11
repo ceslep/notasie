@@ -5,8 +5,13 @@
   import Periodos from './lib/components/grades/Periodos.svelte'
   import ThreeBackground from './lib/components/ui/ThreeBackground.svelte'
   import Notifications from './lib/components/ui/Notifications.svelte'
+  import ThemeToggle from './lib/components/ui/ThemeToggle.svelte'
+  import SocialView from './lib/components/social/SocialView.svelte'
+  import ModalSocialLogin from './lib/components/social/ModalSocialLogin.svelte'
+  import { socialApi, type SocialSesion } from './lib/services/social'
   import { authApi, gradesApi, convivenciaApi } from './lib/services/api'
   import { setUser, updateUserFull } from './lib/stores.svelte'
+  import { swalTheme } from './lib/theme.svelte'
   import { identifyStudent, resetAnalytics, trackPageView, trackLogout, trackEvent } from '$lib/analytics'
   import Swal from 'sweetalert2'
 
@@ -24,6 +29,11 @@
   let asignacion = $state('')
   let photoURL = $state('')
   let email = $state('')
+
+  // Contrasena de la sesion academica. Solo vive en sessionStorage mientras
+  // dura la pestana y sirve para emitir el token de la red social sin volver a
+  // pedir las credenciales al abrir la pestana Social.
+  let pass = $state('')
 
   let dataEstudiante = $state<any>(null)
   let notas = $state<any[]>([])
@@ -43,9 +53,110 @@
   let sessionStartTime = $state(Date.now())
 
   const SESSION_KEY = 'notasie_session'
+  const SOCIAL_SESSION_KEY = 'notasie_social'
+
+  // Red social
+  let modo = $state<'notas' | 'social'>('notas')
+  let sesionSocial = $state<SocialSesion | null>(null)
+  let mostrarSocialLogin = $state(false)
+  /** Desde donde se abrio la red social, para saber a donde volver. */
+  let origenSocial = $state<'login' | 'notas'>('login')
+  /** Pestana que estaba activa en las notas antes de saltar a la red social. */
+  let tabPrevioSocial = $state('UNO')
+
+  function cargarSesionSocial(): SocialSesion | null {
+    try {
+      const raw = sessionStorage.getItem(SOCIAL_SESSION_KEY)
+      if (!raw) return null
+      const data = JSON.parse(raw)
+      return data?.estudiante && data?.token ? (data as SocialSesion) : null
+    } catch {
+      return null
+    }
+  }
+
+  function guardarSesionSocial(s: SocialSesion) {
+    sesionSocial = s
+    try {
+      sessionStorage.setItem(SOCIAL_SESSION_KEY, JSON.stringify(s))
+    } catch {
+      /* almacenamiento no disponible */
+    }
+  }
+
+  function abrirRedSocial() {
+    // Se entra SIEMPRE en modo lectura: no hace falta cuenta para mirar.
+    // El login solo se pide al publicar o comentar (o desde "Entrar").
+    origenSocial = 'login'
+    modo = 'social'
+    trackPageView('social_entrar', { invitado: !sesionSocial })
+  }
+
+  /**
+   * Abre la red social desde la pestana Social del panel de notas.
+   *
+   * El token de la red social solo lo emite el servidor al validar la
+   * contrasena, asi que se reutiliza la de la sesion academica (que sigue
+   * guardada en sessionStorage mientras dure la pestana). Si no hay
+   * contrasena disponible se entra en modo lectura, sin obligar a salir.
+   */
+  async function abrirSocialDesdeNotas() {
+    // Se recuerda la pestana actual: al volver, el panel debe reabrirse en ella
+    // y no en "Social", que solo es un acceso y no un contenido del panel.
+    tabPrevioSocial = showPeriodTabs === 'Social' ? 'UNO' : showPeriodTabs
+    origenSocial = 'notas'
+    modo = 'social'
+    trackPageView('social_desde_notas', { con_credenciales: Boolean(pass) })
+
+    if (sesionSocial || !pass) return
+
+    appLoading = true
+    try {
+      const r = await socialApi.login(estudiante, pass)
+      guardarSesionSocial({
+        estudiante: String(r.estudiante),
+        nombres: String(r.nombres),
+        nivel: String(r.nivel ?? ''),
+        numero: String(r.numero ?? ''),
+        token: String(r.token),
+      })
+    } catch {
+      // Si el backend de la red social no esta disponible se sigue mostrando
+      // el feed publico; no se interrumpe el acceso a las notas.
+    } finally {
+      appLoading = false
+    }
+  }
+
+  function accederRedSocial(s: SocialSesion) {
+    guardarSesionSocial(s)
+    mostrarSocialLogin = false
+    modo = 'social'
+  }
+
+  /** Vuelve de la red social al panel de notas, restaurando la pestana previa. */
+  function volverDeSocial() {
+    if (origenSocial === 'notas') {
+      showPeriodTabs = tabPrevioSocial
+    }
+    modo = 'notas'
+    trackPageView('social_volver', { origen: origenSocial })
+  }
+
+  function salirRedSocial() {
+    try {
+      sessionStorage.removeItem(SOCIAL_SESSION_KEY)
+    } catch {
+      /* ignorar */
+    }
+    sesionSocial = null
+    // Si se llego desde el panel de notas, se vuelve ahi en vez de al login.
+    modo = origenSocial === 'notas' ? 'notas' : 'social'
+    trackPageView('social_logout')
+  }
 
   function saveSession() {
-    const data = { estudiante, nombres, nivel, numero, periodo, asignacion, photoURL, email, showPeriodTabs, dataEstudiante, linkedStudents, currentStudentIdx }
+    const data = { estudiante, nombres, nivel, numero, periodo, asignacion, photoURL, email, pass, showPeriodTabs, dataEstudiante, linkedStudents, currentStudentIdx }
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(data))
   }
 
@@ -61,6 +172,9 @@
   }
 
   onMount(async () => {
+    // Restaura la sesion de la red social, si el estudiante ya habia entrado.
+    sesionSocial = cargarSesionSocial()
+
     const session = loadSession()
     if (session?.estudiante && session?.nombres) {
       appLoading = true
@@ -73,6 +187,7 @@
         asignacion = session.asignacion || '1'
         photoURL = session.photoURL || ''
         email = session.email || ''
+        pass = session.pass || ''
         showPeriodTabs = session.showPeriodTabs || 'UNO'
         dataEstudiante = session.dataEstudiante || null
         linkedStudents = session.linkedStudents || []
@@ -183,6 +298,7 @@
     try {
       const result = await authApi.login({ identificacion: usu, pass: cla })
       if (result.acceso === 'si') {
+        pass = cla
         const y = new Date().getFullYear()
         const [dr, drT] = await Promise.all([
           authApi.getRegister(usu),
@@ -193,11 +309,11 @@
         handleLogin({ text: 'Aceptar', result: true, data: result, dataRegistro, dataRegistroT })
       } else {
         loging = false
-        Swal.fire({ title: 'Acceso Denegado', text: 'Credenciales incorrectas', icon: 'error', background: '#1e293b', color: '#f8fafc', iconColor: '#ef4444', confirmButtonColor: '#6366f1' })
+        Swal.fire({ title: 'Acceso Denegado', text: 'Credenciales incorrectas', icon: 'error', ...swalTheme(), iconColor: '#ef4444', confirmButtonColor: '#6366f1' })
       }
     } catch {
       loging = false
-      Swal.fire({ title: 'Error de conexion', text: 'Intenta de nuevo', icon: 'error', background: '#1e293b', color: '#f8fafc', iconColor: '#ef4444', confirmButtonColor: '#6366f1' })
+      Swal.fire({ title: 'Error de conexion', text: 'Intenta de nuevo', icon: 'error', ...swalTheme(), iconColor: '#ef4444', confirmButtonColor: '#6366f1' })
     }
   }
 
@@ -236,8 +352,7 @@
           icon: 'success',
           timer: 1200,
           showConfirmButton: false,
-          background: '#1e293b',
-          color: '#f8fafc',
+          ...swalTheme(),
           iconColor: '#10b981',
         })
       } catch {
@@ -247,13 +362,13 @@
         convivencia = []
         estudiante = ''
         nombres = ''
-        Swal.fire({ title: 'Error', text: 'No se pudieron cargar los datos', icon: 'error', background: '#1e293b', color: '#f8fafc', iconColor: '#ef4444', confirmButtonColor: '#6366f1' })
+        Swal.fire({ title: 'Error', text: 'No se pudieron cargar los datos', icon: 'error', ...swalTheme(), iconColor: '#ef4444', confirmButtonColor: '#6366f1' })
       } finally {
         appLoading = false
       }
     } else if (detail.text === 'Aceptar' && !detail.result) {
       trackEvent('login_failed')
-      Swal.fire({ title: 'Acceso Denegado', icon: 'error', background: '#1e293b', color: '#f8fafc', iconColor: '#ef4444' })
+      Swal.fire({ title: 'Acceso Denegado', icon: 'error', ...swalTheme(), iconColor: '#ef4444' })
     } else if (detail.text === 'Registrarse') {
       block = 'register'
       trackPageView('register')
@@ -261,6 +376,11 @@
   }
 
   async function handleTabChange(p: string) {
+    if (p === 'Social') {
+      // La pestana Social no carga notas: abre la red social sin salir del panel.
+      await abrirSocialDesdeNotas()
+      return
+    }
     showPeriodTabs = p
     trackPageView('tab_changed', { tab: p })
     if (p === 'Concentrador') {
@@ -327,10 +447,27 @@
 <ThreeBackground />
 <main
   class="relative min-h-screen z-10"
-  ontouchstart={handleTouchStart}
-  ontouchmove={handleTouchMove}
-  ontouchend={handleTouchEnd}
+  ontouchstart={modo === 'social' ? undefined : handleTouchStart}
+  ontouchmove={modo === 'social' ? undefined : handleTouchMove}
+  ontouchend={modo === 'social' ? undefined : handleTouchEnd}
 >
+  {#if modo === 'social'}
+    <SocialView
+      sesion={sesionSocial}
+      origen={origenSocial}
+      onVolver={volverDeSocial}
+      onSalirRed={salirRedSocial}
+      onSolicitarLogin={() => {
+        mostrarSocialLogin = true
+        trackPageView('social_login_visto')
+      }}
+    />
+  {:else}
+  {#if block !== 'periodos'}
+    <div class="fixed top-4 right-4 z-[90]">
+      <ThemeToggle class="glass shadow-lg" />
+    </div>
+  {/if}
   {#if refreshing || isPulling}
     <div class="fixed top-0 left-0 right-0 z-[80] flex items-center justify-center transition-all duration-200" style="height: {Math.min(touchDeltaY, 100)}px; opacity: {Math.min(touchDeltaY / 80, 1)}">
       <div class="flex items-center gap-2">
@@ -342,7 +479,7 @@
     </div>
   {/if}
   {#if appLoading}
-    <div class="fixed inset-0 z-[70] flex items-center justify-center" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);">
+    <div class="fixed inset-0 z-[70] flex items-center justify-center app-page-bg">
       <div class="absolute inset-0 overflow-hidden">
         <div class="absolute -top-40 -left-40 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl animate-pulse"></div>
         <div class="absolute -bottom-40 -right-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
@@ -354,7 +491,7 @@
           <div class="absolute -inset-4 rounded-full border border-indigo-500/20 animate-ping" style="animation-duration: 3s;"></div>
         </div>
         <div class="text-center">
-          <h1 class="text-2xl font-extrabold tracking-tight" style="background: linear-gradient(135deg, #f8fafc, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">I.E. de Occidente</h1>
+          <h1 class="text-2xl font-extrabold tracking-tight app-loader-title">I.E. de Occidente</h1>
           <p class="text-xs text-slate-500 mt-1 tracking-widest uppercase">Plataforma Academica</p>
         </div>
         <div class="flex gap-1.5">
@@ -377,6 +514,7 @@
       {linkedStudents}
       {currentStudentIdx}
       onSwitchStudent={switchStudent}
+      onSocial={abrirSocialDesdeNotas}
     />
   {/if}
 
@@ -432,6 +570,24 @@
               No tienes cuenta? <span class="font-semibold text-indigo-400">Registrate</span>
             </button>
           </div>
+
+          <div class="mt-5 pt-5 border-t border-white/10 animate-in fade-in duration-500 delay-1000">
+            <button
+              type="button"
+              onclick={abrirRedSocial}
+              class="group w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl glass border-white/10 text-sm font-semibold text-slate-200 hover:border-indigo-500/50 hover:text-indigo-400 transition-all active:scale-[0.98]"
+            >
+              <span class="relative flex items-center gap-2.5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                </svg>
+                Red Social del Colegio
+              </span>
+            </button>
+            <p class="mt-2 text-[10px] text-slate-500 text-center">
+              Ver sin cuenta · para publicar y comentar se pide inicio de sesion
+            </p>
+          </div>
         </div>
       </div>
 
@@ -471,4 +627,9 @@
   {#if block === 'periodos'}
     <Notifications {notas} {convivencia} {estudiante} />
   {/if}
+  {/if}
 </main>
+
+{#if mostrarSocialLogin}
+  <ModalSocialLogin onAcceso={accederRedSocial} onClose={() => (mostrarSocialLogin = false)} />
+{/if}
